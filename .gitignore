@@ -1,0 +1,8 @@
+# 工具链临时拷贝（含签名私钥的副本）
+.temp_watch-darkroom/
+
+# 签名私钥（机密，切勿提交到公开仓库）
+**/sign/
+**/private.pem
+**/certificate.pem
+gen-sign.js

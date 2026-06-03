@@ -3,3 +3,5 @@ dist
 build
 .history
 package-lock.json
+sign
+gen-sign.js

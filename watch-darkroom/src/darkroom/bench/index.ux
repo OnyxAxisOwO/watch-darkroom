@@ -1,0 +1,126 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title">性能跑分</text>
+      <text class="s-desc">把计算切成很多小片逐步运行，避免卡住界面。测完给出本设备的算力分数（越高越快）。</text>
+
+      <div class="s-row" @click="run">
+        <text class="s-row-label">{{running ? '测试中…' : '开始跑分'}}</text>
+        <text class="s-row-sub">{{state}}</text>
+      </div>
+
+      <block if="{{done}}">
+        <div class="b-card">
+          <text class="b-score">{{score}}</text>
+          <text class="b-unit">分</text>
+        </div>
+        <text class="b-line">计算耗时 {{ms}} ms / 迭代 {{itersK}} 万次</text>
+        <text class="b-line">{{verdict}}</text>
+      </block>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  var CHUNK = 6000      // 每片迭代数（保持每次同步爆发只有几毫秒）
+  var TARGET = 240000   // 总迭代数
+
+  export default {
+    private: {
+      state: '点击开始',
+      running: false,
+      done: false,
+      score: 0,
+      ms: 0,
+      itersK: 0,
+      verdict: ''
+    },
+    run() {
+      if (this.running) return
+      this.running = true
+      this.done = false
+      this._iters = 0
+      this._compute = 0
+      this._x = 0
+      this.state = '0%'
+      this.tickChunk()
+    },
+    // 每片：跑 CHUNK 次，只统计内部计算时间，然后让出控制权
+    tickChunk() {
+      var self = this
+      setTimeout(function () {
+        var t0 = Date.now()
+        var x = self._x
+        var base = self._iters
+        for (var i = 0; i < CHUNK; i++) {
+          x += Math.sqrt((base + i) * 1.000001)
+          x = x % 100000
+        }
+        var dt = Date.now() - t0
+        self._x = x
+        self._iters += CHUNK
+        self._compute += dt
+        var pct = Math.round(self._iters / TARGET * 100)
+        if (pct > 100) pct = 100
+        self.state = pct + '%'
+        if (self._iters >= TARGET) self.finish()
+        else self.tickChunk()
+      }, 0)
+    },
+    finish() {
+      var ms = this._compute <= 0 ? 1 : this._compute
+      this.ms = ms
+      this.itersK = Math.round(TARGET / 10000)
+      this.score = Math.round(this._iters / ms)   // 每毫秒迭代次数
+      this.verdict = this.judge(this.score)
+      if (this._x === -1) this.verdict += ''       // 防止被优化掉
+      this.state = '完成'
+      this.running = false
+      this.done = true
+    },
+    judge(s) {
+      if (s >= 15000) return '性能：流畅（接近高性能设备）'
+      if (s >= 5000) return '性能：良好，小游戏应能顺跑'
+      if (s >= 1500) return '性能：一般，复杂动画可能掉帧'
+      return '性能：偏弱，建议降低小游戏帧率'
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../settings.css';
+
+  .b-card {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  .b-score {
+    color: #39d98a;
+    font-size: 64px;
+  }
+
+  .b-unit {
+    color: #888888;
+    font-size: 26px;
+    margin-left: 6px;
+    margin-bottom: 10px;
+  }
+
+  .b-line {
+    color: #cccccc;
+    font-size: 22px;
+    text-align: center;
+    line-height: 32px;
+  }
+</style>

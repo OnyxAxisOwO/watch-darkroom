@@ -28,6 +28,11 @@
         <text class="s-row-sub">›</text>
       </div>
 
+      <div class="s-row" @click="go('darkroom/bench')">
+        <text class="s-row-label">性能跑分</text>
+        <text class="s-row-sub">›</text>
+      </div>
+
       <div class="s-row" @click="go('darkroom/about')">
         <text class="s-row-label">关于</text>
         <text class="s-row-sub">›</text>

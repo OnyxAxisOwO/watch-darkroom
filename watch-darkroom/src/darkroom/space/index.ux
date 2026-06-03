@@ -1,24 +1,24 @@
 <template>
-  <div class="sp-root" style="background-color: {{theme.bg}};">
-    <text class="sp-status" style="color: {{theme.dim}};">{{statusText}}</text>
+  <div class="sp-root">
+    <text class="sp-status">{{statusText}}</text>
 
     <div class="field">
       <div class="field-row" for="{{row in grid}}">
-        <text class="sp-cell" for="{{c in row.cells}}" style="color: {{c.color}};">{{c.ch}}</text>
+        <text class="sp-cell {{c.cls}}" for="{{c in row.cells}}">{{c.ch}}</text>
       </div>
     </div>
 
     <div class="sp-controls">
-      <text class="sp-key" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="moveShip(-1)">← 左</text>
-      <text class="sp-key" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="moveShip(1)">右 →</text>
+      <text class="sp-key" @click="moveShip(-1)">← 左</text>
+      <text class="sp-key" @click="moveShip(1)">右 →</text>
     </div>
 
     <!-- 结果弹窗 -->
-    <div class="overlay" if="{{over.active}}" style="background-color: {{theme.bg}};">
-      <text class="ov-title" style="color: {{theme.accent}};">{{over.title}}</text>
-      <text class="ov-text" style="color: {{theme.text}};">{{over.text}}</text>
-      <text if="{{over.kind === 'crash'}}" class="ov-btn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="retry">再试一次</text>
-      <text class="ov-btn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="leave">返回</text>
+    <div class="overlay" if="{{over.active}}">
+      <text class="ov-title">{{over.title}}</text>
+      <text class="ov-text">{{over.text}}</text>
+      <text if="{{over.kind === 'crash'}}" class="ov-btn" @click="retry">再试一次</text>
+      <text class="ov-btn" @click="leave">返回</text>
     </div>
   </div>
 </template>
@@ -26,21 +26,19 @@
 <script>
   import storage from '@system.storage'
   import router from '@system.router'
-  import { THEMES } from '../themes.js'
 
   var SAVE_KEY = 'darkroom_save_v1'
   var W = 7
-  var H = 10
+  var H = 9
   var SHIP_ROW = H - 1
   var TARGET = 60
   var MAX_HULL = 15
-  var TICK = 360
+  var TICK = 380
 
   function rnd(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a }
 
   export default {
     private: {
-      theme: THEMES[0],
       grid: [],
       statusText: '',
       shipX: 3,
@@ -51,11 +49,8 @@
       over: { active: false, kind: '', title: '', text: '' }
     },
 
-    onInit() {
-      var self = this
-      storage.get({ key: 'darkroom_theme', success: function (v) { var i = parseInt(v, 10); if (!isNaN(i) && THEMES[i]) self.theme = THEMES[i] } })
-    },
     onReady() {
+      this.buildGrid()
       this.reset()
       this._alive = true
       this.loop()
@@ -63,14 +58,24 @@
     onHide() { this._alive = false; if (this._t) { clearTimeout(this._t); this._t = null } },
     onDestroy() { this._alive = false; if (this._t) clearTimeout(this._t) },
 
+    // 网格只建一次，之后只改变化的格子
+    buildGrid() {
+      var rows = []
+      for (var r = 0; r < H; r++) {
+        var cells = []
+        for (var c = 0; c < W; c++) cells.push({ ch: ' ', cls: 'c-empty' })
+        rows.push({ cells: cells })
+      }
+      this.grid = rows
+    },
+
     reset() {
       this.shipX = 3
       this.hull = MAX_HULL
-      this.maxHull = MAX_HULL
       this.altitude = 0
       this.asteroids = []
       this.over = { active: false, kind: '', title: '', text: '' }
-      this.render()
+      this.updateGrid()
     },
 
     loop() {
@@ -83,28 +88,22 @@
     },
 
     step() {
-      // 下落
       var next = []
+      var hitThis = false
       for (var i = 0; i < this.asteroids.length; i++) {
         var a = this.asteroids[i]
         a.y++
-        if (a.y > SHIP_ROW) continue       // 越过底部，消失
-        if (a.y === SHIP_ROW && a.x === this.shipX) { this.hit(); continue }
+        if (a.y > SHIP_ROW) continue
+        if (a.y === SHIP_ROW && a.x === this.shipX) { hitThis = true; continue }
         next.push(a)
       }
-      // 生成新陨石
-      var prob = 0.35 + this.altitude / 240
+      var prob = 0.32 + this.altitude / 260
       if (Math.random() < prob) next.push({ x: rnd(0, W - 1), y: 0 })
       this.asteroids = next
-      // 爬升
       this.altitude++
+      if (hitThis) { this.hull--; if (this.hull <= 0) { this.hull = 0; this.crash(); return } }
       if (this.altitude >= TARGET) { this.win(); return }
-      this.render()
-    },
-
-    hit() {
-      this.hull--
-      if (this.hull <= 0) { this.hull = 0; this.crash(); }
+      this.updateGrid()
     },
 
     moveShip(dir) {
@@ -112,13 +111,33 @@
       var nx = this.shipX + dir
       if (nx < 0 || nx >= W) return
       this.shipX = nx
-      // 即时碰撞检测（移动到陨石上）
       for (var i = 0; i < this.asteroids.length; i++) {
         if (this.asteroids[i].y === SHIP_ROW && this.asteroids[i].x === this.shipX) {
-          this.asteroids.splice(i, 1); this.hit(); break
+          this.asteroids.splice(i, 1)
+          this.hull--
+          if (this.hull <= 0) { this.hull = 0; this.crash(); return }
+          break
         }
       }
-      this.render()
+      this.updateGrid()
+    },
+
+    // 只更新发生变化的格子，避免整屏重绘
+    updateGrid() {
+      var occ = {}
+      for (var i = 0; i < this.asteroids.length; i++) occ[this.asteroids[i].x + ',' + this.asteroids[i].y] = 1
+      for (var r = 0; r < H; r++) {
+        var cells = this.grid[r].cells
+        for (var c = 0; c < W; c++) {
+          var ch = ' ', cls = 'c-empty'
+          if (r === SHIP_ROW && c === this.shipX) { ch = '^'; cls = 'c-ship' }
+          else if (occ[c + ',' + r]) { ch = '*'; cls = 'c-rock' }
+          var cell = cells[c]
+          if (cell.ch !== ch) cell.ch = ch
+          if (cell.cls !== cls) cell.cls = cls
+        }
+      }
+      this.statusText = '高度 ' + this.altitude + '/' + TARGET + '　船体 ' + this.hull + '/' + this.maxHull
     },
 
     win() {
@@ -134,37 +153,13 @@
           storage.set({ key: 'darkroom_dirty', value: '1' })
         }
       })
-      this.over = {
-        active: true, kind: 'win', title: '飞向群星',
-        text: '星舰冲破了最后一层云霭，荒原在脚下化作一片寂静的灰。前方，是无垠的星海。\n\n——通关——\n\n感谢游玩《手表版小黑屋》.'
-      }
+      this.over = { active: true, kind: 'win', title: '飞向群星', text: '星舰冲破最后一层云霭，荒原在脚下化作寂静的灰。前方，是无垠的星海。\n\n——通关——\n\n感谢游玩《手表版小黑屋》.' }
     },
     crash() {
-      this.over = {
-        active: true, kind: 'crash', title: '坠毁',
-        text: '船体被陨石撕裂，星舰拖着浓烟坠回大地……\n\n爬升高度：' + this.altitude + ' / ' + TARGET
-      }
+      this.over = { active: true, kind: 'crash', title: '坠毁', text: '船体被陨石撕裂，星舰拖着浓烟坠回大地……\n\n爬升高度：' + this.altitude + ' / ' + TARGET }
     },
     retry() { this.reset() },
-    leave() { router.back() },
-
-    render() {
-      var occ = {}
-      for (var i = 0; i < this.asteroids.length; i++) occ[this.asteroids[i].x + ',' + this.asteroids[i].y] = true
-      var rows = []
-      for (var r = 0; r < H; r++) {
-        var cells = []
-        for (var c = 0; c < W; c++) {
-          var ch = ' ', color = this.theme.bg
-          if (r === SHIP_ROW && c === this.shipX) { ch = '^'; color = this.theme.accent }
-          else if (occ[c + ',' + r]) { ch = '*'; color = this.theme.lose }
-          cells.push({ ch: ch, color: color })
-        }
-        rows.push({ cells: cells })
-      }
-      this.grid = rows
-      this.statusText = '高度 ' + this.altitude + '/' + TARGET + '　船体 ' + this.hull + '/' + this.maxHull
-    }
+    leave() { router.back() }
   }
 </script>
 
@@ -174,11 +169,13 @@
     height: 100%;
     flex-direction: column;
     align-items: center;
+    background-color: #000000;
     padding-top: 36px;
     padding-bottom: 20px;
   }
 
   .sp-status {
+    color: #aaaaaa;
     font-size: 22px;
     margin-bottom: 8px;
     text-align: center;
@@ -196,9 +193,21 @@
 
   .sp-cell {
     width: 40px;
-    height: 32px;
+    height: 34px;
     font-size: 28px;
     text-align: center;
+  }
+
+  .c-empty {
+    color: #000000;
+  }
+
+  .c-ship {
+    color: #39d98a;
+  }
+
+  .c-rock {
+    color: #e05050;
   }
 
   .sp-controls {
@@ -211,6 +220,9 @@
     height: 60px;
     text-align: center;
     border-width: 1px;
+    border-color: #333333;
+    background-color: #1a1a1a;
+    color: #ffffff;
     border-radius: 8px;
     font-size: 28px;
     margin: 8px;
@@ -225,17 +237,20 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    background-color: #000000;
     padding-left: 40px;
     padding-right: 40px;
   }
 
   .ov-title {
+    color: #c8a000;
     font-size: 30px;
     text-align: center;
     margin-bottom: 14px;
   }
 
   .ov-text {
+    color: #ffffff;
     font-size: 24px;
     line-height: 34px;
     text-align: center;
@@ -246,6 +261,9 @@
     align-self: stretch;
     text-align: center;
     border-width: 1px;
+    border-color: #333333;
+    background-color: #1a1a1a;
+    color: #ffffff;
     border-radius: 8px;
     font-size: 26px;
     padding-top: 12px;
