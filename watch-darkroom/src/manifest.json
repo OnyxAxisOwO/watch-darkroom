@@ -119,6 +119,9 @@
       "darkroom/guide/detail": {
         "component": "index"
       },
+      "darkroom/world": {
+        "component": "index"
+      },
       "home": {
         "component": "index"
       },

@@ -10,6 +10,9 @@
         @click="switchTab('outside')">{{outsideTitle}}</text>
     </div>
 
+    <!-- 开发者 FPS（常驻顶部，不随内容滚动） -->
+    <text class="fps" if="{{showFps}}" style="color: {{theme.accent}}; background-color: {{theme.bg}};">{{fpsText}}</text>
+
     <scroll class="body" scroll-y="true">
       <!-- 时间 -->
       <text class="clock" style="color: {{theme.dim}};">{{clock}}</text>
@@ -211,6 +214,8 @@
       tab: 'room',
       seenForest: false,
       clock: '--:--',
+      showFps: false,
+      fpsText: '',
       theme: THEMES[0],
       speed: 1.0,
       dropRate: 1.0,
@@ -354,10 +359,21 @@
       storage.get({ key: THEME_KEY, success: function (v) { var i = parseInt(v, 10); if (!isNaN(i) && THEMES[i]) self.theme = THEMES[i] } })
       storage.get({ key: SPEED_KEY, success: function (v) { var s = parseFloat(v); if (!isNaN(s) && s > 0) self.speed = s } })
       storage.get({ key: DROP_KEY, success: function (v) { var s = parseFloat(v); if (!isNaN(s) && s > 0) self.dropRate = s } })
+      storage.get({ key: 'darkroom_showfps', success: function (v) { self.showFps = (v === '1') } })
     },
 
     // ---------- 主循环 ----------
     tick() {
+      // 开发者 FPS：测量真实回调间隔
+      if (this.showFps) {
+        var now = Date.now()
+        if (this._lastTick) {
+          var dt = now - this._lastTick
+          this._fpsAvg = this._fpsAvg ? (this._fpsAvg * 0.7 + dt * 0.3) : dt
+          this.fpsText = '性能测试 ' + (Math.round(10000 / this._fpsAvg) / 10) + '  ' + Math.round(this._fpsAvg) + 'ms'
+        }
+        this._lastTick = now
+      }
       var sp = this.speed
       if (!sp || sp <= 0) sp = 1
       if (typeof this._acc !== 'number') this._acc = 0
@@ -466,7 +482,13 @@
       else if (id === 'stoke') this.stokeFire()
       else if (id === 'gather') this.gather()
       else if (id === 'traps') this.checkTraps()
+      else if (id === 'embark') this.embark()
       else if (id.indexOf('build:') === 0) this.build(id.slice(6))
+    },
+
+    embark() {
+      this.save()
+      router.push({ uri: 'darkroom/world' })
     },
 
     lightFire() {
@@ -848,6 +870,9 @@
         if ((g.buildings.trap || 0) > 0) {
           list.push({ id: 'traps', label: '检查陷阱', cd: this.cd.traps, disabled: this.cd.traps > 0, cost: '' })
         }
+        if ((this.stores.compass || 0) > 0 || (g.world && g.world.map)) {
+          list.push({ id: 'embark', label: (g.world && g.world.map) ? '继续探索' : '出发探索', cd: 0, disabled: false, cost: '' })
+        }
       }
       this.buttons = list
     },
@@ -981,19 +1006,26 @@
     margin-bottom: 8px;
   }
 
+  .fps {
+    font-size: 22px;
+    text-align: center;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+
   .buttons {
     flex-direction: column;
   }
 
   .btn {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
     background-color: #1a1a1a;
     border-width: 1px;
     border-color: #333333;
     border-radius: 6px;
-    padding: 14px 16px;
+    padding: 12px 16px;
     margin-bottom: 8px;
     min-height: 44px;
   }
@@ -1005,12 +1037,15 @@
 
   .btn-cd {
     color: #555555;
-    font-size: 24px;
+    font-size: 22px;
+    margin-top: 2px;
   }
 
   .btn-cost {
     color: #777777;
     font-size: 22px;
+    margin-top: 2px;
+    lines: 2;
   }
 
   .divider {

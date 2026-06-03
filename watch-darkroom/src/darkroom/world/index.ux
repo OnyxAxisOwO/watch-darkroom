@@ -1,0 +1,585 @@
+<template>
+  <div class="w-root" style="background-color: {{theme.bg}};">
+   <scroll class="w-scroll" scroll-y="true">
+    <!-- 状态栏 -->
+    <text class="w-status" style="color: {{theme.dim}};">{{statusText}}</text>
+
+    <!-- 地图视口 -->
+    <div class="map">
+      <div class="map-row" for="{{row in grid}}">
+        <text class="cell" for="{{c in row.cells}}" style="color: {{c.color}};">{{c.ch}}</text>
+      </div>
+    </div>
+
+    <!-- 方向键 -->
+    <div class="dpad">
+      <div class="dpad-row">
+        <text class="dkey" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="move('N')">北</text>
+      </div>
+      <div class="dpad-row">
+        <text class="dkey" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="move('W')">西</text>
+        <text class="dkey dkey-mid" style="color: {{theme.dim}};">{{midText}}</text>
+        <text class="dkey" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="move('E')">东</text>
+      </div>
+      <div class="dpad-row">
+        <text class="dkey" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="move('S')">南</text>
+      </div>
+    </div>
+
+    <!-- 操作 -->
+    <div class="w-actions">
+      <text if="{{canEat}}" class="w-btn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="eat">吃熏肉(回血)</text>
+      <text class="w-btn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="leave">返回小黑屋</text>
+    </div>
+
+    <!-- 日志 -->
+    <div class="w-logs">
+      <text class="w-log" style="color: {{theme.text}};" for="{{l in logs}}">{{l.text}}</text>
+    </div>
+   </scroll>
+
+    <!-- 战斗弹窗 -->
+    <div class="overlay" if="{{combat.active}}" style="background-color: {{theme.bg}};">
+      <text class="ov-title" style="color: {{theme.accent}};">{{combat.name}}</text>
+      <text class="ov-text" style="color: {{theme.text}};">敌人 HP {{combat.hp}} / {{combat.maxhp}}</text>
+      <text class="ov-text" style="color: {{theme.text}};">你的 HP {{health}} / {{maxHealth}}</text>
+      <text class="ov-btn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="attack">{{attackLabel}}</text>
+      <text class="ov-btn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="flee">逃跑</text>
+    </div>
+
+    <!-- 地标/场景弹窗 -->
+    <div class="overlay" if="{{scene.active}}" style="background-color: {{theme.bg}};">
+      <text class="ov-title" style="color: {{theme.accent}};">{{scene.title}}</text>
+      <text class="ov-text" style="color: {{theme.text}};">{{scene.text}}</text>
+      <text class="ov-btn" for="{{b in scene.buttons}}" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="sceneAction(b.id)">{{b.label}}</text>
+    </div>
+
+    <!-- 通关弹窗 -->
+    <div class="overlay" if="{{ending}}" style="background-color: {{theme.bg}};">
+      <text class="ov-title" style="color: {{theme.accent}};">飞向群星</text>
+      <text class="ov-text" style="color: {{theme.text}};">核心重新轰鸣，星舰挣脱大地。荒原在脚下飞速退去，最终化作一片寂静的灰。前方，是无垠的星海。\n\n——通关——\n\n感谢游玩《手表版小黑屋》.</text>
+      <text class="ov-btn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="leave">回到小黑屋</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import storage from '@system.storage'
+  import router from '@system.router'
+  import { THEMES } from '../themes.js'
+
+  var SAVE_KEY = 'darkroom_save_v1'
+  var RADIUS = 12
+  var SIZE = RADIUS * 2 + 1
+  var VR = 3                 // 视口半径 (7x7)
+  var LIGHT = 2
+  var BASE_WATER = 10
+  var BASE_HEALTH = 10
+  var MOVES_PER_FOOD = 2
+  var FIGHT_DELAY = 3
+  var FIGHT_CHANCE = 0.2
+  var MEAT_HEAL = 8
+
+  var TERRAIN = [';', ',', '.']
+  var LAND_NAMES = {
+    I: '铁矿', C: '煤矿', S: '硫磺矿', V: '潮湿的洞穴', O: '废弃的小镇', W: '坠毁的星舰', A: '小黑屋'
+  }
+
+  function rnd(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a }
+  function dist(x, y) { return Math.abs(x - RADIUS) + Math.abs(y - RADIUS) }
+
+  export default {
+    private: {
+      theme: THEMES[0],
+      grid: [],
+      logs: [],
+      statusText: '',
+      midText: '@',
+      health: 10, maxHealth: 10,
+      water: 10, maxWater: 10,
+      food: 0,
+      canEat: false,
+      combat: { active: false, name: '', hp: 0, maxhp: 0, dmg: 0, tier: 1 },
+      attackLabel: '攻击',
+      scene: { active: false, kind: '', title: '', text: '', buttons: [] },
+      ending: false,
+      game: {}, stores: {},
+      world: null
+    },
+
+    onInit() {
+      var self = this
+      storage.get({ key: 'darkroom_theme', success: function (v) { var i = parseInt(v, 10); if (!isNaN(i) && THEMES[i]) self.theme = THEMES[i] } })
+      this.loadAll()
+    },
+
+    loadAll() {
+      var self = this
+      storage.get({
+        key: SAVE_KEY,
+        success: function (val) {
+          var d = { game: {}, stores: {} }
+          if (val) { try { d = JSON.parse(val) } catch (e) { } }
+          self.game = d.game || {}
+          self.stores = d.stores || {}
+          if (!self.game.buildings) self.game.buildings = {}
+          if (self.game.world && self.game.world.map) {
+            self.world = self.game.world
+          } else {
+            self.world = self.generateWorld()
+            self.game.world = self.world
+          }
+          self.syncCaps()
+          self.render()
+          self.log('你站在荒原上，小黑屋的微光在身后.')
+        }
+      })
+    },
+
+    // ---------- 地图生成 ----------
+    generateWorld() {
+      var map = []
+      for (var y = 0; y < SIZE; y++) {
+        var row = ''
+        for (var x = 0; x < SIZE; x++) {
+          var r = Math.random()
+          row += (r < 0.15) ? '.' : (r < 0.6 ? ';' : ',')
+        }
+        map.push(row)
+      }
+      map = this.setTile(map, RADIUS, RADIUS, 'A')
+      // 地标
+      map = this.placeRing(map, 'I', 4, 1)
+      map = this.placeRing(map, 'C', 6, 1)
+      map = this.placeRing(map, 'S', 8, 1)
+      map = this.placeRing(map, 'V', 5, 3)
+      map = this.placeRing(map, 'O', 7, 2)
+      map = this.placeRing(map, 'W', RADIUS - 1, 1)
+      var mask = []
+      for (var i = 0; i < SIZE; i++) { var m = ''; for (var j = 0; j < SIZE; j++) m += '0'; mask.push(m) }
+      var w = { map: map, mask: mask, x: RADIUS, y: RADIUS, moves: 0, sinceFight: 0 }
+      this.revealAround(w, RADIUS, RADIUS)
+      return w
+    },
+    placeRing(map, ch, radius, count) {
+      var placed = 0, guard = 0
+      while (placed < count && guard < 500) {
+        guard++
+        var x = rnd(0, SIZE - 1), y = rnd(0, SIZE - 1)
+        var dd = Math.abs(x - RADIUS) + Math.abs(y - RADIUS)
+        if (dd < radius - 1 || dd > radius + 1) continue
+        if (map[y].charAt(x) === 'A' || 'ICSVOW'.indexOf(map[y].charAt(x)) >= 0) continue
+        map = this.setTile(map, x, y, ch)
+        placed++
+      }
+      return map
+    },
+    setTile(map, x, y, ch) {
+      var row = map[y]
+      map[y] = row.substring(0, x) + ch + row.substring(x + 1)
+      return map
+    },
+    getTile(x, y) {
+      if (x < 0 || y < 0 || x >= SIZE || y >= SIZE) return ' '
+      return this.world.map[y].charAt(x)
+    },
+    revealAround(w, cx, cy) {
+      for (var dy = -LIGHT; dy <= LIGHT; dy++) {
+        for (var dx = -LIGHT; dx <= LIGHT; dx++) {
+          var x = cx + dx, y = cy + dy
+          if (x < 0 || y < 0 || x >= SIZE || y >= SIZE) continue
+          if (Math.abs(dx) + Math.abs(dy) > LIGHT) continue
+          w.mask[y] = w.mask[y].substring(0, x) + '1' + w.mask[y].substring(x + 1)
+        }
+      }
+    },
+
+    // ---------- 能力上限 ----------
+    syncCaps() {
+      var b = this.game.buildings || {}
+      var mw = BASE_WATER
+      if (b.waterskin) mw += 10
+      if (b.cask) mw += 20
+      if (b['water tank']) mw += 50
+      this.maxWater = mw
+      var mh = BASE_HEALTH
+      if (b['l armour']) mh += 5
+      if (b['i armour']) mh += 10
+      if (b['s armour']) mh += 15
+      this.maxHealth = mh
+      // 进入时补满
+      if (this.world.health === undefined) { this.world.health = mh; this.world.water = mw; this.world.food = Math.min(this.stores['cured meat'] || 0, 10) }
+      this.health = this.world.health
+      this.water = this.world.water
+      this.food = this.world.food
+    },
+
+    bestWeapon() {
+      var b = this.game.buildings || {}
+      var best = { name: '拳头', verb: '挥拳', dmg: 1, ranged: false }
+      if (b['bone spear']) best = { name: '骨枪', verb: '刺', dmg: 2, ranged: false }
+      if (b['iron sword']) best = { name: '铁剑', verb: '挥砍', dmg: 4, ranged: false }
+      if (b['steel sword']) best = { name: '钢剑', verb: '斩', dmg: 6, ranged: false }
+      if (b.rifle && (this.stores.bullets || 0) > 0 && 5 > best.dmg) best = { name: '步枪', verb: '射击', dmg: 5, ranged: true }
+      return best
+    },
+
+    // ---------- 移动 ----------
+    move(dir) {
+      if (this.combat.active || this.scene.active || this.ending) return
+      var w = this.world
+      var nx = w.x, ny = w.y
+      if (dir === 'N') ny--
+      else if (dir === 'S') ny++
+      else if (dir === 'W') nx--
+      else if (dir === 'E') nx++
+      if (nx < 0 || ny < 0 || nx >= SIZE || ny >= SIZE) return
+      w.x = nx; w.y = ny
+      w.moves++
+      // 消耗
+      this.water--
+      if (w.moves % MOVES_PER_FOOD === 0) this.food--
+      if (this.water < 0) { this.water = 0; this.health--; this.log('喉咙干渴.') }
+      if (this.food < 0) { this.food = 0; this.health--; this.log('饥肠辘辘.') }
+      this.persistSurvival()
+      if (this.health <= 0) { this.die(); return }
+      this.revealAround(w, nx, ny)
+      // 地标
+      var t = this.getTile(nx, ny)
+      if (t === 'A') { this.render(); this.log('回到了小黑屋附近.'); this.save(); }
+      else if ('ICSVOW'.indexOf(t) >= 0) { this.enterLandmark(t, nx, ny) }
+      else {
+        // 随机战斗
+        w.sinceFight++
+        if (w.sinceFight >= FIGHT_DELAY && Math.random() < FIGHT_CHANCE) this.startFight()
+      }
+      this.render()
+      this.save()
+    },
+
+    persistSurvival() {
+      if (!this.world) return
+      this.world.health = this.health
+      this.world.water = this.water
+      this.world.food = this.food
+    },
+
+    eat() {
+      if (this.food <= 0) { this.log('没有熏肉可吃了.'); return }
+      this.food--
+      this.health = Math.min(this.maxHealth, this.health + MEAT_HEAL)
+      this.persistSurvival()
+      this.log('吃了点熏肉，恢复了体力.')
+      this.render()
+    },
+
+    die() {
+      this.log('你倒在了荒原上……再睁眼时，已回到小黑屋.')
+      // 重置探险，回到村庄
+      this.game.world = null
+      this.world = null
+      this.save()
+      var self = this
+      setTimeout(function () { self.leave() }, 800)
+    },
+
+    // ---------- 战斗 ----------
+    startFight() {
+      this.world.sinceFight = 0
+      var d = dist(this.world.x, this.world.y)
+      var tier = d < 5 ? 1 : (d < 9 ? 2 : 3)
+      var names = { 1: '咆哮的野兽', 2: '形容枯槁的人', 3: '蒙面的劫匪' }
+      var hp = tier === 1 ? rnd(4, 6) : (tier === 2 ? rnd(7, 9) : rnd(10, 14))
+      var dmg = tier
+      this.combat = { active: true, name: names[tier], hp: hp, maxhp: hp, dmg: dmg, tier: tier }
+      this.attackLabel = '攻击（' + this.bestWeapon().name + '）'
+      this.log('遭遇了' + names[tier] + '！')
+    },
+    attack() {
+      var c = this.combat
+      if (!c.active) return
+      var w = this.bestWeapon()
+      if (w.ranged) this.addStore('bullets', -1)
+      c.hp -= w.dmg
+      this.log('你' + w.verb + '，造成 ' + w.dmg + ' 点伤害.')
+      if (c.hp <= 0) { this.winFight(); return }
+      // 敌人反击
+      if (Math.random() < 0.8) {
+        this.health -= c.dmg
+        this.persistSurvival()
+        this.log('它反击，你受了 ' + c.dmg + ' 点伤.')
+        if (this.health <= 0) { this.combat = { active: false }; this.die(); return }
+      } else this.log('它扑空了.')
+      this.combat = { active: true, name: c.name, hp: c.hp, maxhp: c.maxhp, dmg: c.dmg, tier: c.tier }
+      this.render()
+    },
+    flee() {
+      var c = this.combat
+      if (Math.random() < 0.6) { this.log('你成功脱身了.'); this.combat = { active: false } }
+      else {
+        this.health -= c.dmg
+        this.persistSurvival()
+        this.log('逃跑失败，挨了一下.')
+        if (this.health <= 0) { this.combat = { active: false }; this.die(); return }
+        this.combat = { active: true, name: c.name, hp: c.hp, maxhp: c.maxhp, dmg: c.dmg, tier: c.tier }
+      }
+      this.render()
+    },
+    winFight() {
+      var tier = this.combat.tier
+      this.combat = { active: false }
+      var pool = tier === 1 ? ['fur', 'meat'] : (tier === 2 ? ['fur', 'meat', 'teeth', 'leather'] : ['teeth', 'scales', 'leather', 'cloth'])
+      var got = {}
+      var n = rnd(1, 3)
+      for (var i = 0; i < n; i++) { var k = pool[rnd(0, pool.length - 1)]; got[k] = (got[k] || 0) + rnd(1, 5) }
+      var msgs = []
+      for (var key in got) { this.addStore(key, got[key]); msgs.push((this.resName(key)) + '+' + got[key]) }
+      this.log('击败了敌人，搜得 ' + msgs.join('，') + '.')
+      this.render()
+    },
+
+    // ---------- 地标 ----------
+    enterLandmark(t, x, y) {
+      if (t === 'W') { this.openShip(); return }
+      var e = { active: true, kind: t, title: LAND_NAMES[t], text: '', buttons: [{ id: 'enter', label: '进入探索' }, { id: 'leave', label: '离开' }] }
+      if (t === 'I' || t === 'C' || t === 'S') e.text = '矿井黑黢黢的，似乎还能开采.'
+      else if (t === 'V') e.text = '洞穴深处传来滴水声，或许藏着些什么.'
+      else if (t === 'O') e.text = '小镇空无一人，断壁残垣间也许有遗留物资.'
+      this.scene = e
+    },
+    sceneAction(id) {
+      var t = this.scene.kind
+      var x = this.world.x, y = this.world.y
+      if (id === 'leave') { this.scene = { active: false }; this.render(); return }
+      if (id === 'fix' && t === 'W') {
+        this.addStore('steel', -50); this.addStore('iron', -50)
+        this.scene = { active: false }
+        this.game.won = true
+        this.ending = true
+        this.save()
+        this.render()
+        return
+      }
+      if (t === 'I' || t === 'C' || t === 'S') {
+        var mineBuild = { I: 'iron mine', C: 'coal mine', S: 'sulphur mine' }[t]
+        var res = { I: 'iron', C: 'coal', S: 'sulphur' }[t]
+        this.game.buildings[mineBuild] = 1
+        this.addStore(res, rnd(20, 40))
+        this.log('清理了矿井！村里可以派矿工来此开采了.')
+        this.world.map = this.setTile(this.world.map, x, y, '#')
+      } else if (t === 'V') {
+        var drops = ['fur', 'teeth', 'scales', 'leather', 'medicine']
+        var k = drops[rnd(0, drops.length - 1)]
+        this.addStore(k, rnd(3, 10))
+        this.log('在洞穴里找到了一些' + this.resName(k) + '.')
+        this.world.map = this.setTile(this.world.map, x, y, '#')
+      } else if (t === 'O') {
+        this.addStore('cloth', rnd(2, 8)); this.addStore('leather', rnd(2, 8))
+        if (Math.random() < 0.4) this.addStore('medicine', rnd(1, 3))
+        this.log('在废墟里翻出了一些有用的东西.')
+        this.world.map = this.setTile(this.world.map, x, y, '#')
+      }
+      this.scene = { active: false }
+      this.save()
+      this.render()
+    },
+
+    openShip() {
+      var canFix = (this.stores.steel || 0) >= 50 && (this.stores.iron || 0) >= 50
+      this.scene = {
+        active: true, kind: 'W', title: '坠毁的星舰',
+        text: '一艘古老的星舰半埋在沙土中，核心还有微弱的残响.修复它，也许能离开这片荒原.\n\n需要：钢50 铁50',
+        buttons: canFix ? [{ id: 'fix', label: '重启核心并起飞' }, { id: 'leave', label: '暂时离开' }]
+          : [{ id: 'leave', label: '材料不足，离开' }]
+      }
+    },
+
+    // ---------- 资源 ----------
+    addStore(k, n) {
+      var cur = this.stores[k] || 0
+      this.stores[k] = cur + n
+      if (this.stores[k] < 0) this.stores[k] = 0
+    },
+    resName(k) {
+      var m = { wood: '木头', fur: '毛皮', meat: '肉', scales: '鳞片', teeth: '牙齿', cloth: '布料', leather: '皮革', medicine: '药剂', iron: '铁', coal: '煤', sulphur: '硫磺' }
+      return m[k] || k
+    },
+
+    // ---------- 渲染 ----------
+    render() {
+      var w = this.world
+      if (!w) return
+      var rows = []
+      for (var dy = -VR; dy <= VR; dy++) {
+        var cells = []
+        for (var dx = -VR; dx <= VR; dx++) {
+          var x = w.x + dx, y = w.y + dy
+          var ch = ' ', color = this.theme.bg
+          if (dx === 0 && dy === 0) { ch = '@'; color = this.theme.accent }
+          else if (x >= 0 && y >= 0 && x < SIZE && y < SIZE && w.mask[y].charAt(x) === '1') {
+            ch = w.map[y].charAt(x)
+            if (ch === 'A') color = this.theme.accent
+            else if ('ICSVOW'.indexOf(ch) >= 0) color = this.theme.gain
+            else color = this.theme.dim
+          }
+          cells.push({ ch: ch, color: color })
+        }
+        rows.push({ cells: cells })
+      }
+      this.grid = rows
+      this.canEat = this.food > 0
+      this.statusText = '体力 ' + this.health + '/' + this.maxHealth + '　水 ' + this.water + '　熏肉 ' + this.food
+    },
+
+    log(text) {
+      if (!text) return
+      this.logs.unshift({ text: text })
+      if (this.logs.length > 20) this.logs.pop()
+    },
+
+    // ---------- 存档 / 退出 ----------
+    save() {
+      if (this.world) this.game.world = this.world
+      this.persistSurvival()
+      storage.set({ key: SAVE_KEY, value: JSON.stringify({ game: this.game, stores: this.stores, seenForest: true, tab: 'outside' }) })
+      storage.set({ key: 'darkroom_dirty', value: '1' })
+    },
+    leave() {
+      this.save()
+      router.back()
+    }
+  }
+</script>
+
+<style lang="css">
+  .w-root {
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+  }
+
+  .w-scroll {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .w-status {
+    font-size: 22px;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .map {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .map-row {
+    flex-direction: row;
+  }
+
+  .cell {
+    width: 40px;
+    height: 36px;
+    font-size: 28px;
+    text-align: center;
+  }
+
+  .dpad {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .dpad-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dkey {
+    width: 70px;
+    height: 56px;
+    text-align: center;
+    border-width: 1px;
+    border-radius: 8px;
+    font-size: 26px;
+    margin: 4px;
+  }
+
+  .dkey-mid {
+    border-width: 0;
+    font-size: 28px;
+  }
+
+  .w-actions {
+    flex-direction: column;
+    align-self: stretch;
+  }
+
+  .w-btn {
+    text-align: center;
+    border-width: 1px;
+    border-radius: 8px;
+    font-size: 24px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 8px;
+  }
+
+  .w-logs {
+    align-self: stretch;
+    flex-direction: column;
+  }
+
+  .w-log {
+    font-size: 22px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    lines: 2;
+    text-overflow: ellipsis;
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .ov-title {
+    font-size: 30px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+
+  .ov-text {
+    font-size: 24px;
+    line-height: 34px;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .ov-btn {
+    align-self: stretch;
+    text-align: center;
+    border-width: 1px;
+    border-radius: 8px;
+    font-size: 26px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 10px;
+  }
+</style>
