@@ -1,0 +1,154 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+
+    <text class="title">1. 颜色</text>
+    <div class="grid">
+      <div
+        class="grid-item"
+        for="{{colors}}"
+        style="background-color: {{$item}};"
+      >
+        <text class="index">{{$idx + 1}}</text>
+      </div>
+    </div>
+
+    <text class="title">2. 尺寸</text>
+    <div class="grid">
+      <div class="small green"></div>
+      <div class="large blue"></div>
+      <div class="small red"></div>
+      <div class="large red"></div>
+      <div class="large green"></div>
+    </div>
+
+    <text class="title">3. 定位</text>
+    <div class="wrapper">
+      <div class="corner left-top"></div>
+      <div class="corner top-right"></div>
+      <div class="corner right-bottom"></div>
+      <div class="corner bottom-left"></div>
+      <div class="center"></div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    public: {
+      colors: [
+        // 背景色
+        "rgb(222, 224, 227)",
+        "rgb(186, 206, 253)",
+        "rgb(142, 224, 133)",
+        "rgb(173, 130, 247)",
+        "rgb(250, 211, 85)",
+        "rgb(247, 105, 100)",
+        "rgb(143, 149, 158)",
+        "rgb(51, 112, 255)",
+        "rgb(46, 161, 33)",
+        "rgb(100, 37, 208)",
+        "rgb(216, 57, 49)",
+        "rgb(55, 60, 67)"
+      ]
+    },
+
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../../common/comm.css';
+
+  .grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 400px;
+  }
+
+  .grid-item {
+    width: 58px;
+    height: 58px;
+    margin-bottom: 10px;
+  }
+
+  .index {
+    color: white;
+    text-align: center;
+    width: 100%;
+  }
+
+  .small {
+    width: 100px;
+    height: 100px;
+  }
+
+  .large {
+    width: 200px;
+    height: 100px;
+  }
+
+  .blue {
+    background-color: #469efd;
+  }
+
+  .green {
+    background-color: #28c943;
+  }
+
+  .red {
+    background-color: #ff5d58;
+  }
+
+  .wrapper {
+    position: relative;
+    width: 400px;
+    height: 100px;
+    background-color: #ff5d58;
+  }
+
+  .corner {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    background-color: #28c943;
+  }
+
+  .left-top {
+    left: 0;
+    top: 0;
+  }
+
+  .top-right {
+    right: 0;
+    top: 0;
+  }
+
+  .right-bottom {
+    right: 0;
+    bottom: 0;
+  }
+
+  .bottom-left {
+    bottom: 0;
+    left: 0;
+  }
+
+  .center {
+    position: absolute;
+    left: 180px;
+    top: 30px;
+    width: 40px;
+    height: 40px;
+    background-color: #469efd;
+  }
+</style>

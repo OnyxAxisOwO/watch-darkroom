@@ -1,0 +1,63 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title">配色主题</text>
+      <text class="s-desc">仅改变游戏界面的背景、文字和按钮颜色。</text>
+
+      <div class="s-row" for="{{item in list}}" @click="pick(item.index)"
+        style="background-color: {{item.btnBg}}; border-color: {{item.btnBorder}};">
+        <text class="s-row-label" style="color: {{item.text}};">{{item.name}}</text>
+        <text if="{{item.index === current}}" class="s-check" style="color: {{item.accent}};">✓</text>
+        <text else class="s-row-sub" style="color: {{item.accent}};">●</text>
+      </div>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+  import { THEMES } from '../themes.js'
+
+  export default {
+    private: {
+      list: [],
+      current: 0
+    },
+    onInit() {
+      var arr = []
+      for (var i = 0; i < THEMES.length; i++) {
+        var t = THEMES[i]
+        arr.push({
+          index: i, name: t.name, text: t.text,
+          btnBg: t.bg, btnBorder: t.btnBorder, accent: t.accent
+        })
+      }
+      this.list = arr
+    },
+    onShow() {
+      var self = this
+      storage.get({
+        key: 'darkroom_theme',
+        success: function (v) {
+          var i = parseInt(v, 10)
+          if (!isNaN(i)) self.current = i
+        }
+      })
+    },
+    pick(i) {
+      var self = this
+      this.current = i
+      storage.set({ key: 'darkroom_theme', value: String(i) })
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../settings.css';
+</style>

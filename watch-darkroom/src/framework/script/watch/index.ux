@@ -1,0 +1,68 @@
+<import name="child-button" src="./button.ux"></import>
+<import name="child-button-a" src="./buttonA.ux"></import>
+
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+
+    <text class="header">1. 当前页面注册$watch</text>
+    <text class="btn" @click="handleBaseTypeClick">基础类型</text>
+    <text class="code">监听结果：{{result1}}</text>
+    <text class="btn" @click="handleObjTypeClick">引用类型</text>
+    <text class="code">监听结果：{{result2}}</text>
+    <text class="header">2. 子组件注册$watch</text>
+    <child-button child-count="{{childCount}}" @child-btn-click="handleChildClick"></child-button>
+    <text class="code">父组件监听结果：{{result3}}</text>
+    <text class="header">3. 子组件入参别名</text>
+    <child-button-a child-count-a="{{childACount}}" @child-a-btn-click="handleChildAClick"></child-button-a>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      count: 0,
+      childCount: 0,
+      childACount: 0,
+      info: {
+        count: 0
+      },
+      result1: '',
+      result2: '',
+      result3: ''
+    },
+
+    onInit() {
+      this.$watch('count', 'handleBaseTypeChange')
+      this.$watch('info', 'handleObjTypeChange')
+      this.$watch('childCount', 'handleChildCountChange')
+    },
+    handleBaseTypeClick() {
+      this.count++
+    },
+    handleBaseTypeChange() {
+      this.result1 = `base type changed ${this.count}`
+    },
+    handleObjTypeClick() {
+      this.info = { count: 1 }
+    },
+    handleObjTypeChange() {
+      this.result2 = `object type changed ${this.info.count}`
+    },
+    handleChildClick() {
+      this.childCount++
+    },
+    handleChildAClick() {
+      this.childACount++
+    },
+    handleChildCountChange() {
+      this.result3 = `parent base type changed ${this.childCount}`
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

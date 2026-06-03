@@ -1,0 +1,49 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title">游戏倍速</text>
+      <text class="s-desc">倍速会加快游戏内的时间流速：火焰衰减、温度变化、建造者推进、冷却恢复等都会按所选倍率同步加快。手表碎片化体验下，调高倍速能更快推进进度。</text>
+
+      <div class="s-row" for="{{item in list}}" @click="pick(item.value)">
+        <text class="s-row-label">{{item.label}}</text>
+        <text if="{{item.value === current}}" class="s-check">✓</text>
+      </div>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+  import { SPEEDS } from '../themes.js'
+
+  export default {
+    private: {
+      list: SPEEDS,
+      current: 1.0
+    },
+    onShow() {
+      var self = this
+      storage.get({
+        key: 'darkroom_speed',
+        success: function (v) {
+          var s = parseFloat(v)
+          if (!isNaN(s)) self.current = s
+        }
+      })
+    },
+    pick(v) {
+      this.current = v
+      storage.set({ key: 'darkroom_speed', value: String(v) })
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../settings.css';
+</style>

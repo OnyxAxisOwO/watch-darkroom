@@ -1,0 +1,221 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="tips">marquee 必须设宽高，否则文字不显示</text>
+    <!-- 滚动必须调用start方法 才能滚动起来，多个marquee放在一起不会换行 -->
+    <text class="header">1. scrollamount属性(60/30/90)</text>
+    <div class="column">
+      <marquee id="marquee1" scrollamount="60">scrollamount控制滚动速度，当前为60（60像素/秒）</marquee>
+      <marquee id="marquee2" scrollamount="30">scrollamount控制滚动速度，当前为30（30像素/秒）</marquee>
+      <marquee id="marquee3" scrollamount="90">scrollamount控制滚动速度，当前为90（90像素/秒）</marquee>
+    </div>
+    <text class="header">2. loop属性(无限循环/循环两次/循环四次)</text>
+    <div class="column">
+      <marquee id="marquee4" scrollamount="90">scrollamount控制滚动速度为90（90像素/秒）</marquee>
+      <marquee id="marquee5" scrollamount="90" loop="2">scrollamount控制滚动速度为90（90像素/秒）</marquee>
+      <marquee id="marquee6" scrollamount="90" loop="4">scrollamount控制滚动速度为90（90像素/秒）</marquee>
+    </div>
+
+    <text class="header">3. direction属性（left/right）</text>
+    <div class="column">
+      <marquee id="marquee7" direction="left">scrollamount控制滚动速度，默认值为6（6像素/秒）</marquee>
+      <marquee id="marquee8" direction="right">scrollamount控制滚动速度，默认值为6（6像素/秒）</marquee>
+    </div>
+
+    <text class="header">4. color(rgba(0, 0, 0, 0.54)/blueviolet)</text>
+    <div class="column">
+      <marquee>scrollamount控制滚动速度，默认值为6（6像素/秒）</marquee>
+      <marquee style="color:blueviolet">scrollamount控制滚动速度，默认值为6（6像素/秒）</marquee>
+    </div>
+
+    <text class="header">5. font-size(默认/20px)</text>
+    <div class="column">
+      <marquee>默认字体(30px)</marquee>
+      <marquee style="font-size: 20px">字体大小为20px</marquee>
+    </div>
+
+    <text class="header not-support">6. font-family</text>
+    <div class="column">
+      <marquee style="font-family: Georgia, 'Times New Roman', Times, serif;">scrollamount控制滚动速度，默认值为6（6像素/秒）</marquee>
+      <marquee style="font-family: Verdana, Geneva, Tahoma, sans-serif">scrollamount控制滚动速度，默认值为6（6像素/秒）</marquee>
+      <marquee style="font-family:fantasy">scrollamount控制滚动速度，默认值为6（6像素/秒）</marquee>
+    </div>
+
+    <text class="header">7. 事件bounce，start，finish</text>
+    <div>
+      <marquee id="marquee9" @bounce="handleBounce" @start="handleStart" @finish="handleFinish" scrollamount="90"
+        loop="1">scrollamount控制滚动速度，默认值为6（6像素/秒）</marquee>
+    </div>
+
+    <text class="header">8. 方法start，stop</text>
+    <div class="column">
+      <div>
+        <input type="button" class="inputBtn" @click="handleBegin" value="开始"></input>
+        <input type="button" class="inputBtn" style="margin-left:10px" @click="handleStop" value="结束"></input>
+      </div>
+      <marquee id="marquee10">scrollamount控制滚动速度，默认值为6（6像素/秒）</marquee>
+    </div>
+
+    <text class="header">9. 通用属性</text>
+    <text style="color: cadetblue;">for属性</text>
+    <marquee for="{{value in dataList}}" scrollamount="60" id="{{value}}">for属性</marquee>
+    <text style="color: cadetblue;">if属性</text>
+    <marquee if="{{if_marquee}}" scrollamount="60" id="marquee12">if属性</marquee>
+    <text style="color: cadetblue;">show属性</text>
+    <marquee show="{{show_marquee}}" scrollamount="60" id="marquee13">show属性</marquee>
+
+    <text class="header">10. 通用样式</text>
+    <text style="color: cadetblue;">width,height,min/max-height/width,margin,padding,border,opacity</text>
+    <marquee class="marquee_style" scrollamount="60" id="marquee14">width,height...</marquee>
+    <text style="color: cadetblue;">position(top=20px,right=30px)</text>
+    <marquee class="marquee_style" style="position: relative;top:20px;right:30px;" id="marquee15" scrollamount="60">width,height,min/max-height/width,margin,padding,border,opacity</marquee>
+
+    <text style="color: cadetblue;">不加display,visibility</text>
+    <marquee class="marquee_style" scrollamount="60" id="marquee16">width,height,min/max-height/width,margin,padding,border,opacity</marquee>
+    <text style="color: cadetblue;">display=none</text>
+    <marquee class="marquee_style" style="display: none;" scrollamount="60" id="marquee17">width,height,min/max-height/width,margin,padding,border,opacity</marquee>
+    <text style="color: cadetblue;">visibility=hidden</text>
+    <marquee class="marquee_style" style="visibility: hidden;" scrollamount="60" id="marquee18">width,height,min/max-height/width,margin,padding,border,opacity</marquee>
+    <text style="color: cadetblue;">visibility=visible</text>
+    <marquee class="marquee_style" style="visibility: visible;" scrollamount="60" id="marquee19">width,height,min/max-height/width,margin,padding,border,opacity</marquee>
+
+    <text class="header">11. 通用事件</text>
+    <marquee @touchstart="handleTouchstart" scrollamount="60" id="marquee20">touchstart</marquee>
+    <marquee @touchmove="handleTouchmove" scrollamount="60" id="marquee21">touchmove</marquee>
+    <marquee @touchend="handleTouchend" scrollamount="60" id="marquee22">touchend</marquee>
+    <marquee @click="handleClick" scrollamount="60" id="marquee23">click</marquee>
+    <marquee @longpress="handleLongpress" scrollamount="60" id="marquee24">longpress</marquee>
+    <marquee @swipe="handleSwipe" scrollamount="60" id="marquee25">swipe</marquee>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    data: {
+      btnText: '开始',
+      marqueeStatus: false,
+      dataList:['marquee26','marquee27','marquee28'],
+      if_marquee:true,
+      show_marquee:true,
+    },
+    onReady() {
+      this.$element('marquee1').start();
+      this.$element('marquee2').start();
+      this.$element('marquee3').start();
+      this.$element('marquee4').start();
+      this.$element('marquee5').start();
+      this.$element('marquee6').start();
+      this.$element('marquee7').start();
+      this.$element('marquee8').start();
+      this.$element('marquee9').start();
+      this.$element('marquee10').start();
+      this.$element('marquee12').start();
+      this.$element('marquee13').start();
+      this.$element('marquee14').start();
+      this.$element('marquee15').start();
+      this.$element('marquee16').start();
+      this.$element('marquee17').start();
+      this.$element('marquee18').start();
+      this.$element('marquee19').start();
+      this.$element('marquee20').start();
+      this.$element('marquee21').start();
+      this.$element('marquee22').start();
+      this.$element('marquee23').start();
+      this.$element('marquee24').start();
+      this.$element('marquee25').start();
+      this.$element('marquee26').start();
+      this.$element('marquee27').start();
+      this.$element('marquee28').start();
+    },
+
+    back() {
+      router.back();
+    },
+    handleBounce() {
+      console.log("滚动结尾触发")
+    },
+    handleStart() {
+      console.log("滚动开始触发")
+    },
+    handleFinish() {
+      console.log("loop 次数执行完触发")
+    },
+    handleBegin() {
+      this.$element('marquee10').start()
+    },
+    handleStop() {
+      this.$element('marquee10').stop()
+    },
+    handleTouchstart(eve){
+      console.log('touchstart');
+      console.log(eve);
+    },
+    handleTouchmove(eve){
+      console.log('touchmove');
+      console.log(eve);
+    },
+    handleTouchend(eve){
+      console.log('touchend');
+      console.log(eve);
+    },
+    handleClick(eve){
+      console.log('click');
+      console.log(eve);
+    },
+    handleLongpress(eve){
+      console.log('longpress');
+      console.log(eve);
+    },
+    handleSwipe(eve){
+      console.log('swipe');
+      console.log(eve);
+    },
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+
+  /* .column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }  */
+
+  marquee {
+    width: 100%;
+    height: 50px;
+    color: rgb(0, 153, 255);
+    /* animation-name: slidein;
+    animation-duration: 3s; */
+  }
+
+  .inputBtn {
+    width: 40px;
+    height: 20px;
+    background-color: gray;
+    color: white;
+    color: black;
+    font-size: 12px;
+  }
+  .marquee_style{
+    width: 10px;
+    height: 10px;
+    min-width: 100px;
+    max-width: 300px;
+    min-height: 50px;
+    max-height: 300px;
+    border:5px solid blueviolet;
+    border-radius: 10px;
+    margin: 20px;
+    /* background-color: cadetblue; */
+    background-image: url('/common/img2.png');
+    padding-left: 10px;
+    padding-right: 100px;
+    /* padding: 50px; */
+    color: black;
+    opacity: 0.4;
+  }
+</style>

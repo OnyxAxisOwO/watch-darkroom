@@ -1,0 +1,152 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+
+    <text class="header">8. 通用属性</text>
+    <text style="color: cadetblue;">for属性</text>
+    <image class="image-src" for="{{dataList}}" src="/common/img1.png" alt="blank" />
+    <text style="color: cadetblue;" @click="handleClickif">if属性</text>
+    <image class="image-src" if="{{if_image}}" src="/common/img1.png" alt="blank" />
+    <text style="color: cadetblue;" @click="handleClickShow">show属性</text>
+    <image class="image-src" show="{{show_image}}" src="/common/img1.png" alt="blank" />
+
+    <text class="header">9. 通用样式</text>
+    <text style="color: cadetblue;">width,height,min/max-height/width</text>
+    <image class="image_style" src="/common/img1.png"></image>
+    <text style="color: cadetblue;">margin/padding/border/opacity</text>
+    <image class="image_margin" src="/common/img1.png"></image>
+    <text style="color: cadetblue;">display=none</text>
+    <image class="image_style" style="display: none;" src="/common/img1.png"></image>
+    <text style="color: cadetblue;">display=flex</text>
+    <image class="image_style" style="display: flex;" src="/common/img1.png"></image>
+    <text style="color: cadetblue;">visibility=hidden</text>
+    <image class="image_style" style="visibility: hidden;" src="/common/img1.png"></image>
+    <text style="color: cadetblue;">visibility=visible</text>
+    <image class="image_style" style="visibility: visible;" src="/common/img1.png"></image>
+    <text style="color: cadetblue;font-size: 16px;margin-top: 10px;">position-relative(left=10px,top=10px)</text>
+    <text style="color: cadetblue;font-size: 16px;">position-relative(bottom=10px,right=10px)</text>
+    <div style="width: 100%;height: 150px;border: 1px solid black;">
+      <image class="image_style" style="border:1px solid blueviolet;position: relative;left: 10px;top:10px;" src="/common/img1.png"></image>
+      <image class="image_style" style="border:1px solid blueviolet;position: relative;right: 10px;bottom:10px;" src="/common/img1.png"></image>
+    </div>
+    
+    <div class="column" style="border: 1px solid black;height: 300px;margin-top: 20px;">
+      <text style="color: cadetblue;font-size: 16px;">position-absolute(left=10px,top=100px)</text>
+      <image class="image_style" style="border:1px solid blueviolet;position: absolute;left: 10px;top:100px;" src="/common/img1.png"></image>
+      <text style="color: cadetblue; font-size: 16px;">position-absolute(bottom=10px,right=10px)</text>
+      <image class="image_style" style="border:1px solid blueviolet;position: absolute;right: 10px;bottom:10px;" src="/common/img1.png"></image>
+    </div>
+    
+
+    <text class="header">10. 通用事件</text>
+    <text style="color: cadetblue;">touchstart</text>
+    <image class="image-src" @touchstart="handleTouchstart" src="/common/img1.png" alt="blank" />
+    <text style="color: cadetblue;">touchmove</text>
+    <image class="image-src" @touchmove="handleTouchmove" src="/common/img1.png" alt="blank" />
+    <text style="color: cadetblue;">touchend</text>
+    <image class="image-src" @touchend="handleTouchend" src="/common/img1.png" alt="blank" />
+    <text style="color: cadetblue;">click</text>
+    <image class="image-src" @click="handleClick" src="/common/img1.png" alt="blank" />
+    <text style="color: cadetblue;">longpress</text>
+    <image class="image-src" @longpress="handleLongpress" src="/common/img1.png" alt="blank" />
+    <text style="color: cadetblue;">swipe</text>
+    <image class="image-src" @swipe="handleSwipe" src="/common/img1.png" alt="blank" />
+    
+
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      dataList:[1,2,3],
+      if_image:true,
+      show_image:true,
+    },
+
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    },
+    handleImgComplete(e) {
+      console.log('image complete' + e.width + e.height);
+    },
+    handleImgError() {
+      console.log('image error');
+    },
+    handleClick(eve){
+      console.log('click');
+      console.log(eve);
+    },
+    handleClickif(){
+      this.if_image = !this.if_image;
+    },
+    handleClickShow(){
+     this.show_image = !this.show_image;
+    },
+    handleTouchstart(eve){
+      console.log('touchstart');
+      console.log(eve);
+    },
+    handleTouchmove(eve){
+      console.log('touchmove');
+      console.log(eve);
+    },
+    handleTouchend(eve){
+      console.log('touchend');
+      console.log(eve);
+    },
+    handleClick(eve){
+      console.log('click');
+      console.log(eve);
+    },
+    handleLongpress(eve){
+      console.log('longpress');
+      console.log(eve);
+    },
+    handleSwipe(eve){
+      console.log('swipe');
+      console.log(eve);
+    },
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+
+  .image-src {
+    width: 100px;
+    height: 100px;
+  }
+
+  text{
+    font-size: 20px;
+  }
+  .imageSize {
+    border: 10px solid orange;
+    width: 300px;
+    height: 200px;
+  }
+  .image_style{
+    width: 20px;
+    height: 20px;
+    min-width: 80px;
+    max-width: 120px;
+    min-height: 80px;
+    max-height: 120px;
+  }
+  .image_margin{
+    width: 80px;
+    height: 80px;
+    margin: 20px;
+    border: 5px solid green;
+    padding: 30px;
+    border-radius: 10px;
+    opacity: 0.4;
+  }
+</style>

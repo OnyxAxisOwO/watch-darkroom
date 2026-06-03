@@ -1,0 +1,42 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+
+    <text class="header">1. focus()</text>
+    <div class="column group">
+      <div class="box" id="box1"></div>
+      <text class="code">{{msg}}</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      msg: ''
+    },
+
+    onReady() {
+      let box1 = this.$element('box1');
+
+      console.log('box1', box1);
+
+      try {
+        box1.focus();
+        this.msg = 'success'
+      } catch (error) {
+        this.msg = 'Error:' + error.message;
+      }
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../../style/comm.css';
+</style>

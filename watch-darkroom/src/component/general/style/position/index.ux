@@ -1,0 +1,142 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+
+    <text class="header">1. absolute</text>
+
+    <text class="label">left/top</text>
+    <div class="group box">
+      <text style="color: white">这里是没有定位的元素...</text>
+      <text class="box1" style="position: absolute; left: 10px; top: 10px;"></text>
+      <text class="box2" style="position: absolute; left: 20px; top: 20px;"></text>
+      <text class="box3" style="position: absolute; left: 30px; top: 30px;"></text>
+    </div>
+
+    <text class="label">left/bottom</text>
+    <div class="group box">
+      <text style="color: white">这里是没有定位的元素...</text>
+      <text class="box1" style="position: absolute; left: 10px; bottom: 10px;"></text>
+      <text class="box2" style="position: absolute; left: 20px; bottom: 20px;"></text>
+      <text class="box3" style="position: absolute; left: 30px; bottom: 30px;"></text>
+    </div>
+
+    <text class="label">right/top</text>
+    <div class="group box">
+      <text style="color: white">这里是没有定位的元素...</text>
+      <text class="box1" style="position: absolute; right: 10px; top: 10px;"></text>
+      <text class="box2" style="position: absolute; right: 20px; top: 20px;"></text>
+      <text class="box3" style="position: absolute; right: 30px; top: 30px;"></text>
+    </div>
+
+    <text class="label">right/bottom</text>
+    <div class="group box">
+      <text style="color: white">这里是没有定位的元素...</text>
+      <text class="box1" style="position: absolute; right: 10px; bottom: 10px;"></text>
+      <text class="box2" style="position: absolute; right: 20px; bottom: 20px;"></text>
+      <text class="box3" style="position: absolute; right: 30px; bottom: 30px;"></text>
+    </div>
+
+    <text class="label">同时设置：left/right</text>
+    <div class="group box">
+      <text style="color: white">这里是没有定位的元素...</text>
+      <text class="box4" style="position: absolute; left: 10px; right: 10px;"></text>
+      <!-- <text class="box5" style="position: absolute; left: 20px; right: 20px; top: 20px"></text> -->
+      <!-- <text class="box6" style="position: absolute; left: 30px; right: 30px; top: 30px"></text> -->
+    </div>
+
+
+    <text class="label">同时设置：top/bottom</text>
+    <div class="group box">
+      <text style="color: white">这里是没有定位的元素...</text>
+      <text class="box5" style="position: absolute; left: 10px; right: 10px; top: 10px; bottom: 10px;"></text>
+    </div>
+
+    <text class="label">同时设置：left/right/top/bottom</text>
+    <div class="group box">
+      <text style="color: white">这里是没有定位的元素...</text>
+      <text class="box6" style="position: absolute; left: 10px; right: 10px; top: 10px; bottom: 10px;"></text>
+    </div>
+
+    <text class="label">百分比： left/right</text>
+    <div class="group box">
+      <text style="color: white">这里是没有定位的元素...</text>
+      <text class="box1 small-text" style="position: absolute; left: 10%; top: 10px">l:10%</text>
+      <text class="box2 small-text" style="position: absolute; left: 50%; top: 20px">l:50%</text>
+      <text class="box3 small-text" style="position: absolute; left: 90%; top: 10px">l:90%</text>
+      <text class="box3 small-text" style="position: absolute; right: 10%; top: 50px">r:10%</text>
+      <text class="box1 small-text" style="position: absolute; right: 50%; top: 60px">r:50%</text>
+    </div>
+
+    <text class="label">百分比: top/bottom</text>
+    <div class="group box">
+      <text style="color: white">这里是没有定位的元素...</text>
+      <text class="box1 small-text" style="position: absolute; top: 10%; left: 10px;">t:10%</text>
+      <text class="box2 small-text" style="position: absolute; top: 50%; left: 20px;">t:50%</text>
+      <text class="box3 small-text" style="position: absolute; bottom: 50%; left: 70px">b:50%</text>
+      <text class="box1 small-text" style="position: absolute; bottom: 10%; left: 80px">b:10%</text>
+    </div>
+
+    <text class="header">2. relative</text>
+    <text class="label">left/top</text>
+    <div class="group box">
+      <text style="color: white">这里是没有定位的元素...</text>
+      <text class="box1" style="position: relative; left: 10px; top: 10px;"></text>
+      <text class="box2" style="position: relative; left: 20px; top: 20px;"></text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../../style/comm.css';
+
+  .box1 {
+    width: 50px;
+    height: 50px;
+    background-color: orange;
+  }
+
+  .box2 {
+    width: 50px;
+    height: 50px;
+    background-color: #090;
+  }
+
+  .box3 {
+    width: 50px;
+    height: 50px;
+    background-color: #09f;
+  }
+
+  .box4 {
+    height: 50px;
+    background-color: orange;
+  }
+
+  .box5 {
+    width: 50px;
+    /* height: 50px; */
+    background-color: #090;
+  }
+
+  .box6 {
+    background-color: #09f;
+  }
+
+  .small-text {
+    font-size: 16px;
+  }
+</style>

@@ -1,0 +1,226 @@
+<template>
+  <div class="page animation-page">
+    <div class="section">
+      <text class="title">transform - translate</text>
+      <text class="sub-title">original</text>
+      <div style="border: 1px solid #000000;">
+        <div class="translate-original"><text>original</text></div>
+        <div class="translate-original"><text>original</text></div>
+      </div>
+      <text class="sub-title">1.translate</text>
+      <div style="border: 1px solid #000000;">
+        <div class="translate1"><text>translate(20px, 20px)</text></div>
+        <div class="translate2"><text>translate(10%, 10%)</text></div>
+      </div>
+      <text class="sub-title">2.translateX</text>
+      <div style="border: 1px solid #000000;">
+        <div class="translatex1"><text>translateX(20px)</text></div>
+        <div class="translatex2"><text>translateX(10%)</text></div>
+      </div>
+      <text class="sub-title">3.translateY</text>
+      <div style="border: 1px solid #000000;">
+        <div class="translatey1"><text>translateY(20px)</text></div>
+        <div class="translatey2"><text>translateY(10%)</text></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <text class="title">transform - scale</text>
+      <div class="scale-ori"><text>original</text></div>
+      <text class="sub-title">1.scale</text>
+      <div>
+        <div class="scale1"><text>scale(2, 2)</text></div>
+        <div class="scale2"><text>scale(2)</text></div>
+      </div>
+      <text class="sub-title">2.scaleX</text>
+      <div>
+        <div class="scalex"><text>scaleX(2)</text></div>
+      </div>
+      <text class="sub-title">3.scaleY</text>
+      <div>
+        <div class="scaley"><text>scaleY(2)</text></div>
+      </div>
+    </div>
+    <div class="section">
+      <text class="title">animation</text>
+      <text class="sub-title">1.animation - infinite / ease-in / 2s / scale</text>
+      <div class="animation1"></div>
+      <text class="sub-title">2.animation - 3 times / linear / 1s / change_color</text>
+      <div class="animation2"></div>
+    </div>
+    <div class="section">
+      <text class="title">transition</text>
+      <text class="sub-title">1.transition - opacity from 1 to 0 / ease-in / 2s</text>
+      <div class="transition1" style="opacity: {{opacity}}"></div>
+      <text class="sub-title">2.transition - margin-left from 0 to 100px / linear / 3s</text>
+      <div class="transition2" style="margin-left: {{marginl}}"></div>
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    data: {
+      opacity: 1,
+      marginl: 0
+    },
+    onShow() {
+      setTimeout(()=>{
+        this.opacity = 0
+        this.marginl = '100px'
+      }, 3000)
+    }
+  }
+</script>
+
+<style>
+  .translate-original {
+    background-color: #ff0000;
+    width: 200px;
+    height: 200px;
+    border: 1px solid blue;
+  }
+
+  .translate1 {
+    background-color: #ff0000;
+    width: 200px;
+    height: 200px;
+    border: 1px solid blue;
+    transform: translate(20px, 20px);
+  }
+
+  .translate2 {
+    background-color: #ff0000;
+    width: 200px;
+    height: 200px;
+    border: 1px solid blue;
+    transform: translate(10%, 10%);
+  }
+
+  .translatex1 {
+    background-color: #ff0000;
+    width: 200px;
+    height: 200px;
+    border: 1px solid blue;
+    transform: translateX(20px);
+  }
+
+  .translatex2 {
+    background-color: #ff0000;
+    width: 200px;
+    height: 200px;
+    border: 1px solid blue;
+    transform: translateX(10%);
+  }
+
+  .translatey1 {
+    background-color: #ff0000;
+    width: 200px;
+    height: 200px;
+    border: 1px solid blue;
+    transform: translateY(20px);
+  }
+
+  .translatey2 {
+    background-color: #ff0000;
+    width: 200px;
+    height: 200px;
+    border: 1px solid blue;
+    transform: translateY(10%);
+  }
+
+  .scale-ori {
+    background-color: #ff0000;
+    width: 100px;
+    height: 100px;
+    border: 1px solid blue;
+  }
+
+  .scale1 {
+    background-color: #ff0000;
+    width: 100px;
+    height: 100px;
+    border: 1px solid blue;
+    transform: scale(2, 2);
+  }
+
+  .scale2 {
+    background-color: #ff0000;
+    width: 100px;
+    height: 100px;
+    border: 1px solid blue;
+    transform: scale(2);
+  }
+
+  .scalex {
+    background-color: #ff0000;
+    width: 100px;
+    height: 100px;
+    border: 1px solid blue;
+    transform: scaleX(2);
+  }
+
+  .scaley {
+    background-color: #ff0000;
+    width: 100px;
+    height: 100px;
+    border: 1px solid blue;
+    transform: scaleY(2);
+  }
+
+  .animation1 {
+    background-color: #ff0000;
+    width: 100px;
+    height: 100px;
+    border: 1px solid blue;
+    animation-name: scale;
+    animation-duration: 2s;
+    animation-timing-function: ease-in;
+    animation-iteration-count: infinite;
+  }
+
+  .animation2 {
+    background-color: #ff0000;
+    width: 100px;
+    height: 100px;
+    border: 1px solid blue;
+    animation-name: change_color;
+    animation-duration: 3s;
+    animation-timing-function: linear;
+    animation-iteration-count: 3;
+  }
+
+  @keyframes scale {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(2);
+    }
+  }
+
+  @keyframes change_color {
+    from {
+      background-color: #ff0000;
+    }
+    to {
+      background-color: #000000;
+    }
+  }
+
+  .transition1 {
+    background-color: #ff0000;
+    width: 100px;
+    height: 100px;
+    border: 1px solid blue;
+    transition: opacity,width 2s ease-in .5s;
+  }
+
+  .transition2 {
+    background-color: #ff0000;
+    width: 100px;
+    height: 100px;
+    border: 1px solid blue;
+    transition: 3s linear;
+  }
+</style>

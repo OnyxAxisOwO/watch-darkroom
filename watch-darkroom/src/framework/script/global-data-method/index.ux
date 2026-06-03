@@ -1,0 +1,61 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    
+    <text class="header">1. 全局数据</text>
+    <div class="column group">
+      <text class="label">template中使用</text>
+      <text>结果：{{JSON.stringify($app.$def.globalInfo)}}</text>
+
+      <text class="label">template中使用</text>
+      <text>结果: {{$app.$def.globalId}}</text>
+
+      <text class="label">script中使用</text>
+      <text>结果：{{globalInfo}}</text>
+
+      <text  class="label">script中使用</text>
+      <text>结果: {{globalId}}</text>
+    </div>
+
+    <text class="header">2. 全局方法</text>
+    <div class="column group">
+      <text>全局方法返回的结果: {{globalMethodRes}}</text>
+    </div>
+
+    <text class="header">3. $app.exit()</text>
+    <div class="column group">
+      <text @click="{{exit}}">退出应用</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      globalMethodRes: -1,
+      globalInfo: -1,
+      globalId: -1
+    },
+
+    onReady() {
+      this.globalId = this.$app.$def.globalId;
+      this.globalInfo = JSON.stringify(this.$app.$def.globalInfo);
+
+      this.globalMethodRes = this.$app.$def.getID();
+    },
+
+    back() {
+      router.back();
+    },
+
+    exit() {
+      this.$app.exit();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

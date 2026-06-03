@@ -1,0 +1,132 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1. 支持qrcode标签</text>
+    <qrcode value="https://iot.mi.com"></qrcode>
+
+    <text class="header">2. color</text>
+    <qrcode value="https://iot.mi.com" style="color: #008cff"></qrcode>
+
+    <text class="header">3. background-color</text>
+    <qrcode value="https://iot.mi.com" style="background-color: #ff0000"></qrcode>
+    
+    <text class="header">4. 通用属性(for,if,show) </text>
+    <div>
+      <qrcode value="https://iot.mi.com"  for="{{dataList}}"></qrcode>
+      <qrcode value="https://iot.mi.com"  show="{{show_qrcode}}"></qrcode>
+      <qrcode value="https://iot.mi.com"  if="{{if_qrcode}}"></qrcode>
+    </div>
+
+    <text class="header">5. 通用样式 </text>
+    <text style="color: cadetblue;margin-top: 10px;">width,height,min/max-height/width,margin,padding,border,background-image,opacity</text>
+    <div>
+      <qrcode value="https://iot.mi.com" class="qrcode_style"></qrcode>
+    </div>
+
+    <text style="color: cadetblue;">display=none</text>
+    <div>
+      <qrcode value="https://iot.mi.com" style="display: none;"></qrcode>
+    </div>
+    <text style="color: cadetblue;">display=flex</text>
+    <qrcode value="https://iot.mi.com" style="display: flex;"></qrcode>
+    <text style="color: cadetblue;">visibility=hidden</text>
+    <qrcode value="https://iot.mi.com" style="visibility: hidden;" ></qrcode>
+    <text style="color: cadetblue;">visibility=visible</text>
+    <qrcode value="https://iot.mi.com" style="visibility: visible;"></qrcode>
+
+    <text style="color: cadetblue;margin-top: 10px;">relative(left:30px,top:20px;right:10px,bottom: 10px;)</text>
+    <div style="width: 100%; height: 200px;border: 1px solid black;">
+      <qrcode value="https://iot.mi.com" style="position: relative;left:30px;top:20px;width: 100px;height: 100px; border: 1px solid blue"></qrcode>
+      <qrcode value="https://iot.mi.com" style="position: relative;right:10px;bottom: 10px;width: 100px;height: 100px; border: 1px solid blue"></qrcode>
+    </div>
+
+    <text style="color: cadetblue;margin-top: 10px;">absolute(left:10px,top:10px;right:10px,bottom: 10px;)</text>
+    <div style="width: 100%; height: 200px;border: 1px solid black;">
+      <qrcode value="https://iot.mi.com" style="position: absolute;left:30px;top:20px;width: 100px;height: 100px; border: 1px solid blue"></qrcode>
+      <qrcode value="https://iot.mi.com" style="position: absolute;right:10px;bottom: 10px;width: 100px;height: 100px; border: 1px solid blue"></qrcode>
+    </div>
+
+    <text class="header">6. 通用事件 </text>
+    <text style="color: cadetblue;margin-top: 10px;">touchstart/touchmove/touchend/click/longpress/swipe</text>
+    <div class="column">
+      <qrcode class="qrcode" value="https://iot.mi.com" @touchstart="handleTouchstart"></qrcode>
+      <qrcode class="qrcode" value="https://iot.mi.com" @touchmove="handleTouchmove"></qrcode>
+      <qrcode class="qrcode" value="https://iot.mi.com" @touchend="handleTouchend"></qrcode>
+      <qrcode class="qrcode" value="https://iot.mi.com" @click="handleClick"></qrcode>
+      <qrcode class="qrcode" value="https://iot.mi.com" @longpress="handleLongpress"></qrcode>
+      <qrcode class="qrcode" value="https://iot.mi.com" @swipe="handleSwipe"></qrcode>
+    </div>
+
+    <text class="header">7. 内边距 </text>
+    <div>
+      <qrcode style="background-color: #ff0000" value="https://iot.mi.com"></qrcode>
+      <qrcode style="background-color: #ff0000" value="https://iot.mi.com/vela/quickapp/zh/content/intro.html"></qrcode>
+      <qrcode style="background-color: #ff0000" value="qqmusic://qq.com/other/openid?p=%7B%22cmd%22%3A%22qrcode%22%2C%22appId%22%3A%22168%22%2C%22code%22%3A%22-MpuGhpeHzKhPVwDE88Qa%22%7D"></qrcode>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    data: {
+      dataList:[1,2,3],
+      if_qrcode:true,
+      show_qrcode:false,
+    },
+    back() {
+      router.back();
+    },
+    handleTouchstart(eve){
+      console.log('touchstart');
+      console.log(eve);
+    },
+    handleTouchmove(eve){
+      console.log('touchmove');
+      console.log(eve);
+    },
+    handleTouchend(eve){
+      console.log('touchend');
+      console.log(eve);
+    },
+    handleClick(eve){
+      console.log('click');
+      console.log(eve);
+    },
+    handleLongpress(eve){
+      console.log('longpress');
+      console.log(eve);
+    },
+    handleSwipe(eve){
+      console.log('swipe');
+      console.log(eve);
+    },
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+  text{
+    font-size: 20px;
+  }
+  .qrcode_style{
+    width: 20px;
+    height: 20px;
+    min-width: 200px;
+    max-width: 220px;
+    min-height: 200px;
+    max-height: 220px;
+    border: 5px solid blueviolet;
+    padding: 20px;
+    margin-left: 100px;
+    background-image: url('/common/img2.png');
+    background-size: cover;
+    opacity: 0.4;
+  }
+  .qrcode{
+    width: 100px;
+    height: 100px;
+    margin-top: 20px;
+  }
+</style>

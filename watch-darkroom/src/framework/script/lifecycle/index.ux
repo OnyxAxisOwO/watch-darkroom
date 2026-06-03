@@ -1,0 +1,78 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    
+    <text class="header">1. 生命周期执行顺序</text>
+    <div class="column">
+      <div for="{{list}}">
+        <text>{{$idx}}</text>
+      </div>
+    </div>
+
+    <text class="tips">页面生命周期onBackPress/onMunuPress暂时无法测试</text>
+    <text class="tips">app生命周期onHide, onDestroy暂时无法测试</text>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      list: [],
+    },
+
+    onInit() {
+      // this.list.push('onInit');
+      console.log('[lifecycle] [page] onInit');
+      throw new Error('[lifecycle] [page] onInit test app onError')
+    },
+
+    onReady() {
+      // this.list.push('onReady');
+      console.log('[lifecycle] [page] onReady');
+      throw new Error('[lifecycle] [page] onReady test app onError')
+    },
+
+    onShow() {
+      // this.list.push('onShow');
+      console.log('[lifecycle] [page] onShow');
+      throw new Error('[lifecycle] [page] onShow test app onError')
+    },
+
+    onRefresh() {
+      // this.list.push('onRefresh');
+      console.log('[lifecycle] [page] onRefresh');
+      throw new Error('[lifecycle] [page] onRefresh test app onError')
+    },
+
+    onHide() {
+      // this.list.push('onHide');
+      console.log('[lifecycle] [page] onHide');
+    },
+
+    onDestroy() {
+      // this.list.push('onDestroy');
+      console.log('[lifecycle] [page] onDestroy');
+      throw new Error('[lifecycle] [page] onDestroy test app onError')
+    },
+
+    onBackPress() {
+      // this.list.push('onBackPress');
+      console.log('[lifecycle] [page] onBackPress');
+    },
+
+    onMenuPress() {
+      // this.list.push('onMenuPress');
+      console.log('[lifecycle] [page] onMenuPress');
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

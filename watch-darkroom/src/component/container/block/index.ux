@@ -1,0 +1,88 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="title-1">一、static属性</text>
+    <text class="text-desc">block组件是一个逻辑区块节点，如果增加了static属性，表示block包含的所有节点都是静态数据绑定，数据只计算一次，后面不会发生改变。</text>
+    <text class="title-2">1、数据只渲染1次</text>
+    <text class="text-case">txtVal：{{txtVal}}</text>
+    <block static>
+      <text class="text-case">static txtVal：{{txtVal}}</text>
+    </block>
+    <input class="input_button" type="button" value="修改txtVal" @click="changeTxtValue" />
+    <text class="title-2">2、onInit、onReady生命周期</text>
+    <text class="text-case">txtVal1：{{txtVal1}}</text>
+    <block static>
+      <text class="text-case">static txtVal1：{{txtVal1}}</text>
+    </block>
+    <text class="title-2">3、if指令</text>
+    <text class="text-case" if="{{display}}">Hello-1</text>
+    <text class="text-case" else>Hello-2</text>
+    <block static >
+      <text class="text-case" if="{{display}}">static: Hello-1</text>
+      <text class="text-case" else>static: Hello-2</text>
+    </block>
+    <input class="input_button" type="button" value="修改bool值为false" @click="changeDisplay" />
+    <text class="title-2">4、for指令</text>
+    <text class="text-desc">list</text>
+    <text class="text-case" for="{{list}}">item_{{$item}}</text>
+    <text class="text-desc">static list</text>
+    <text class="text-case" for="{{list}}">item_{{$item}}</text>
+    <input class="input_button" type="button" value="删除最后一项" @click="popList" />
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+export default {
+  private: {
+    txtVal: 'aaa',
+    txtVal1: '111',
+    display: true,
+    list: ['a', 'b', 'c', 'd']
+  },
+  back() {
+    router.back();
+  },
+  changeTxtValue () {
+    this.txtVal = 'bbb'
+  },
+  changeDisplay () {
+    this.display = false
+  },
+  onInit () {
+    this.txtVal1 = 'onInit修改'
+  },
+  onReady () {
+    this.txtVal1 = 'onReady修改'
+  },
+  popList () {
+    this.list.pop()
+  }
+}
+</script>
+
+<style lang="less" scoped>
+@import '../../../style/comm.css';
+.title-1 {
+  font-size: 24px;
+  font-weight: 500;
+}
+.title-2 {
+  font-size: 22px;
+  font-weight: 500;
+}
+.text-desc {
+  font-size: 20px;
+}
+.text-case {
+  font-size: 20px;
+  color: #ff0000;
+}
+.input_button {
+  width: 160px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 16px;
+  color: #fff;
+}
+</style>

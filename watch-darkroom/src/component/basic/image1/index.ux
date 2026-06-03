@@ -1,0 +1,73 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1. src属性</text>
+    <div>
+      <image class="image-src" src="/common/img1.png" />
+    </div>
+
+    <text class="header">2. src为本地资源，当图片未显示时 alt提示</text>
+    <div>
+      <image class="image-src" src="/common/img.jpg" alt="/common/logo.png" />
+    </div>
+
+    <text class="header">3. src为远程资源</text>
+    <div>
+      <image class="image-src" src="https://s02.mifile.cn/assets/static/image/logo-mi2.png" alt="blank" />
+    </div>
+    <text class="header">4. object-fit</text>
+    <div>
+      <image class="imageSize" src="/common/img1.png" alt="blank" />
+      <text>原始图片</text>
+    </div>
+    <div>
+      <image class="imageSize" style="width: 100px;height: 200px;object-fit:contain" src="/common/img1.png"
+        alt="blank" />
+      <text class="bug">contain ,缩小在边界内</text>
+    </div>
+    <div>
+      <image class="imageSize" style="width: 100px;height: 200px" src="/common/img1.png" alt="blank" />
+      <text>cover</text>
+    </div>
+    <div>
+      <image class="imageSize" style="object-fit:none" src="/common/img1.png" alt="blank" />
+      <text>none</text>
+    </div>
+    <div>
+      <image class="imageSize" style="object-fit:scale-down" src="/common/img1.png" alt="blank" />
+      <text class="">scale-down</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+    },
+
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    },
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+
+  .image-src {
+    width: 100px;
+    height: 100px;
+  }
+
+  .imageSize {
+    border: 10px solid orange;
+    width: 300px;
+    height: 200px;
+  }
+</style>

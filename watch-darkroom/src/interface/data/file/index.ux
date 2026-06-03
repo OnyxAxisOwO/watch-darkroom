@@ -1,0 +1,256 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1. 文件存储 file</text>
+    <div class="column group">
+      <text>fileDownloadData:{{fileDownloadData}}</text>
+      <input type="button" class="btn" onclick="downloadFile" value="下载文件" />
+      <input type="button" class="btn" onclick="moveFile" value="移动文件" />
+      <input type="button" class="btn" onclick="copyFile" value="拷贝文件" />
+      <input type="button" class="btn" onclick="listFiles" value="获取文件列表" />
+      <input type="button" class="btn" onclick="getFileInfo" value="获取文件信息" />
+      <input type="button" class="btn" onclick="deleteFile" value="删除文件" />
+      <input type="button" class="btn" onclick="writeFile" value="写文件" />
+      <input type="button" class="btn" onclick="writeFileBuffer" value="写buffer文件" />
+      <input type="button" class="btn" onclick="readFile" value="读文件" />
+      <input type="button" class="btn" onclick="readFileFromAppPackage" value="读文件(应用包内资源)" />
+      <input type="button" class="btn" onclick="readFileBuffer" value="从文件读取buffer" />
+      <input type="button" class="btn" onclick="readFileBufferFromAppPackage" value="从文件读取buffer(应用包内资源)" />
+      <input type="button" class="btn" onclick="accessFile" value="判断文件或目录是否存在" />
+      <input type="button" class="btn" onclick="mkdir" value="创建目录" />
+      <input type="button" class="btn" onclick="rmdir" value="删除目录" />
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import file from '@system.file'
+  import request from '@system.request'
+
+  export default {
+    private: {
+      token: '',
+      fileDownloadData: ''
+    },
+    onReady() {
+
+    },
+    downloadFile() {
+      const self = this
+      // 下载文件
+      request.download({
+        url: 'https://www.quickapp.cn/assets/images/home/logo_quickApp.png',
+        description: '一个网络图片', // 指定描述
+        filename: 'quickappLogo.png', // 指定文件名
+        success: function (ret) {
+          self.token = ret.token
+          self.downloadFileComplete();
+        }
+      })
+    },
+    downloadFileComplete () {
+      const self = this
+      request.onDownloadComplete({
+        token: self.token,
+        success: function (ret) {
+          self.fileDownloadData = ret.uri
+        },
+        fail: function (msg, code) {
+          console.info(`### request.onDownloadComplete ### ${code}: ${msg}`)
+          prompt.showToast({
+            message: `${code}: ${msg}`
+          })
+        }
+      })
+    },
+    //将源文件移动到指定位置
+    moveFile() {
+      file.move({
+        srcUri: 'internal://files/quickappLogo.png',
+        dstUri: 'internal://files/quickappLogo1.png',
+        success: function (uri) {
+          console.log(`move success: ${uri}`)
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //将源文件复制一份并存储到指定位置
+    copyFile() {
+      file.copy({
+        srcUri: 'internal://files/quickappLogo1.png',
+        dstUri: 'internal://files/quickappLogo2.png',
+        success: function (uri) {
+          console.log(`copy success: ${uri}`)
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //获取指定目录下的文件列表
+    listFiles() {
+      file.list({
+        uri: 'internal://files/',
+        success: function (data) {
+          console.log(data.fileList)
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //获取本地文件的文件信息
+    getFileInfo() {
+      file.get({
+        uri: 'internal://files/quickappLogo.png',
+        success: function (data) {
+          console.log(data.uri)
+          console.log(data.length)
+          console.log(data.lastModifiedTime)
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //删除本地存储的文件
+    deleteFile() {
+      file.delete({
+        uri: 'internal://files/demo.txt',
+        success: function (data) {
+          console.log('handling success')
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //写文本到文件
+    writeFile() {
+      file.writeText({
+        uri: 'internal://files/demo.txt',
+        text: 'test',
+        success: function () {
+          console.log('handling success')
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //写 Buffer 到文件
+    writeFileBuffer() {
+      const buffer = new Uint8Array();
+      file.writeArrayBuffer({
+        uri: 'internal://files/demo.txt',
+        buffer: buffer,
+        success: function () {
+          console.log('handling success')
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //从文件中读取文本
+    readFile() {
+      file.readText({
+        uri: 'internal://files/demo.txt',
+        success: function (data) {
+          console.log('文件内容: ' + data.text)
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    // 读取应用包内的资源
+    readFileFromAppPackage() {
+      file.readText({
+        uri: '/common/demo.txt',
+        success: function (data) {
+          console.log('文件内容: ' + data.text)
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //从文件中读取 Buffer
+    readFileBuffer() {
+      file.readArrayBuffer({
+        uri: 'internal://files/demo.txt',
+        position: 100,
+        length: 100,
+        success: function (data) {
+          console.log('buffer' + JSON.stringify(data));
+          console.log('buffer.length: ' + data.buffer.length);
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    // 读取应用包内的资源buffer
+    readFileBufferFromAppPackage() {
+      file.readArrayBuffer({
+        uri: '/common/demo.txt',
+        position: 0,
+        length: 100,
+        success: function (data) {
+          console.log('buffer' + JSON.stringify(data));
+          console.log('buffer.length: ' + data.buffer.length);
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //判断文件或目录是否存在
+    accessFile() {
+      file.access({
+        uri: 'internal://files/quickappLogo.png',
+        success: function (data) {
+          console.log(`handling success`)
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //创建目录
+    mkdir() {
+      file.mkdir({
+        uri: 'internal://files/work/',
+        success: function (data) {
+          console.log(`file.mkdir handling success`)
+        },
+        fail: function (data, code) {
+          console.log(`file.mkdir handling fail, code = ${code}`)
+        }
+      })
+    },
+    //删除目录
+    rmdir() {
+      file.rmdir({
+        uri: 'internal://files/work/',
+        success: function (data) {
+          console.log(`file.rmdir handling success`)
+        },
+        fail: function (data, code) {
+          console.log(`file.rmdir handling fail, code = ${code}`)
+        }
+      })
+    },
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

@@ -1,0 +1,49 @@
+<template>
+	<div class="column page">
+		<text class="back" @click="back">返回</text>
+
+		<text class="title">支持的图片类型</text>
+		<div class="column group">
+			<text>1.png</text>
+			<image class="image-src" src="../../../common/img1.png" alt="blank" />
+			<text>2.jpg</text>
+			<image class="image-src" src="../../../common/img1.jpg" alt="blank" />
+			<text>3.gif</text>
+			<image class="image-src" src="../../../common/photo1.gif" alt="blank" />
+			<text>4.webp</text>
+			<image
+				class="image-src"
+				src="../../../common/webpPhoto.webp"
+				alt="blank"
+			/>
+			<text class="header">5. 远程图片-https</text>
+			<div>
+				<image
+					class="image-src"
+					src="https://s02.mifile.cn/assets/static/image/logo-mi2.png"
+					alt="blank"
+				/>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+import router from "@system.router";
+
+export default {
+	onReady() {},
+
+	back() {
+		router.back();
+	},
+};
+</script>
+
+<style>
+@import "../../../common/comm.css";
+.image-src {
+	width: 100px;
+	height: 100px;
+}
+</style>

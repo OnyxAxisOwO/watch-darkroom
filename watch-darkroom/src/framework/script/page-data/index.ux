@@ -1,0 +1,64 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    
+    <text class="header">1. 页面数据对象</text>
+    <div class="column group">
+      <text>num: {{num}}</text>
+    </div>
+    <text class="header">2. $page </text>
+    <div class="column group">
+      <text>name: {{name}}</text>
+      <text>path: {{path}}</text>
+      <text>component: {{component}}</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      num: null,
+      name: '',
+      path: '',
+      component: ''
+    },
+
+    onInit() {
+      setTimeout(() => {
+        this.num = 1;
+      }, 1000);
+
+      setTimeout(() => {
+        this.num = 3;
+      }, 2000);
+
+      setTimeout(() => {
+        this.num = 5;
+      }, 3000);
+    },
+
+    onReady() {
+      // 不同分支对$page 支持情况不同，增加try catch 防止崩溃
+      try {
+        let {name, path , component} = this.$page
+        this.name = name
+        this.path = path
+        this.component = component
+        console.log('show $page data ', this.$page)
+      } catch(e) {
+        console.log('show $page error: 该环境可能不支持$page')
+      }
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

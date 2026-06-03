@@ -1,0 +1,90 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">list,list-item</text>
+    <div class="list-container">
+      <list class="products-wraper" @scroll="handleScroll" @scrollbottom="handleScrollbottom"
+        @scrolltop="handleScrolltop" @scrollend="handleScrollend" @scrolltouchup="handleScrolltouchup">
+        <list-item for="{{productList}}" class="product-item" type="list-item">
+          <text style="color:white">{{$item.name}}:{{$item.price}}</text>
+        </list-item>
+      </list>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    data: {
+      productList: [
+        {
+          name: '衣服',
+          price: '100',
+        },
+        {
+          name: '裤子',
+          price: '200',
+        },
+        {
+          name: '上衣',
+          price: '150',
+        }
+      ]
+    },
+    onReady() {
+    },
+
+    back() {
+      router.back();
+    },
+    handleScroll(eve) {
+      console.log("scroll");
+      console.log(eve);
+    },
+    handleScrollbottom(eve){
+      console.log("scrollbottom");
+      console.log(eve);
+    },
+    handleScrolltop(eve){
+      console.log("scrolltop");
+      console.log(eve);
+    },
+    handleScrollend(eve){
+      console.log("scrollend");
+      console.log(eve);
+    },
+    handleScrolltouchup(eve){
+      console.log("scrolltouchup");
+      console.log(eve);
+    },
+
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+
+  .list-container {
+    width: 100%;
+  }
+
+  .products-wraper {
+    width: 100%;
+    height: 300px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.212);
+    border-radius: 10px;
+  }
+
+  .product-item {
+    width: 70%;
+    height: 100px;
+    color: white;
+    background-color: rgba(0, 153, 255, 0.603);
+    border: 1px solid rgba(255, 255, 255, 0.102);
+    border-radius: 10px;
+    margin-top: 20px;
+    margin-left: 50px;
+  }
+</style>

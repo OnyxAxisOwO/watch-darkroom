@@ -1,0 +1,33 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1.设备信息 device</text>
+    <div class="column group">
+      <text>应用配置:</text>
+      <text>{{localeInfo}}</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import configuration from '@system.configuration'
+
+  export default {
+    private: {
+      localeInfo: {}
+    },
+    onReady() {
+      const localeInfo = JSON.stringify(configuration.getLocale(),null,2)
+      this.localeInfo = localeInfo;
+      console.log(localeInfo)
+    },
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

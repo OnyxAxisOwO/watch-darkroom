@@ -1,0 +1,73 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title">通勤设置</text>
+
+      <div class="warn-box">
+        <text class="warn-text">注意：调整爆率会放大资源掉落与采集产量，可能影响游戏平衡度，并带来一些 bug。想要原汁原味请保持默认。</text>
+      </div>
+
+      <text class="s-desc">爆率会作用于森林采集与陷阱掉落的数量。</text>
+
+      <div class="s-row" for="{{item in list}}" @click="pick(item.value)">
+        <text class="s-row-label">{{item.label}}</text>
+        <text if="{{item.value === current}}" class="s-check">✓</text>
+      </div>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+
+  export default {
+    private: {
+      list: [
+        { label: '默认 1.0x', value: 1.0 },
+        { label: '1.2x', value: 1.2 },
+        { label: '1.5x', value: 1.5 },
+        { label: '2.0x', value: 2.0 }
+      ],
+      current: 1.0
+    },
+    onShow() {
+      var self = this
+      storage.get({
+        key: 'darkroom_droprate',
+        success: function (v) {
+          var s = parseFloat(v)
+          if (!isNaN(s) && s > 0) self.current = s
+        }
+      })
+    },
+    pick(v) {
+      this.current = v
+      storage.set({ key: 'darkroom_droprate', value: String(v) })
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../settings.css';
+
+  .warn-box {
+    background-color: #2a1810;
+    border-width: 1px;
+    border-color: #5a3a1a;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .warn-text {
+    color: #e0b070;
+    font-size: 22px;
+    line-height: 32px;
+  }
+</style>

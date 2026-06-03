@@ -1,0 +1,173 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title">{{name}}</text>
+
+      <div class="val-box">
+        <text class="val-text">{{value}}</text>
+      </div>
+
+      <div class="pad">
+        <div class="pad-row" for="{{row in rows}}">
+          <div class="pad-key" for="{{k in row}}" @click="tap(k)">
+            <text class="pad-key-text">{{k}}</text>
+          </div>
+        </div>
+        <div class="pad-row">
+          <div class="pad-key" @click="clear">
+            <text class="pad-key-text">C</text>
+          </div>
+          <div class="pad-key" @click="tap('0')">
+            <text class="pad-key-text">0</text>
+          </div>
+          <div class="pad-key" @click="backspace">
+            <text class="pad-key-text">删</text>
+          </div>
+        </div>
+      </div>
+
+      <div class="save-btn" @click="save">
+        <text class="save-text">保存</text>
+      </div>
+      <div class="s-back" @click="back">
+        <text class="s-back-text">取消</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+
+  export default {
+    protected: {
+      key: '',
+      name: ''
+    },
+    private: {
+      value: '0',
+      rows: [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']]
+    },
+    onShow() {
+      var self = this
+      storage.get({
+        key: 'darkroom_save_v1',
+        success: function (val) {
+          var v = 0
+          if (val) {
+            try { v = (JSON.parse(val).stores || {})[self.key] || 0 } catch (e) { }
+          }
+          self.value = String(v)
+        }
+      })
+    },
+    tap(k) {
+      var v = (this.value === '0') ? '' : this.value
+      v += k
+      // 限制长度，避免溢出
+      if (v.length > 7) v = v.slice(0, 7)
+      this.value = v
+    },
+    backspace() {
+      var v = this.value.length > 0 ? this.value.slice(0, -1) : ''
+      this.value = (v === '') ? '0' : v
+    },
+    clear() { this.value = '0' },
+    save() {
+      var self = this
+      var n = parseInt(this.value, 10)
+      if (isNaN(n) || n < 0) n = 0
+      storage.get({
+        key: 'darkroom_save_v1',
+        success: function (val) {
+          var data = { game: {}, stores: {}, seenForest: false, tab: 'room' }
+          if (val) {
+            try { data = JSON.parse(val) } catch (e) { }
+          }
+          if (!data.stores) data.stores = {}
+          data.stores[self.key] = n
+          // 木头解锁森林
+          if (self.key === 'wood' && n >= 0) data.seenForest = true
+          storage.set({
+            key: 'darkroom_save_v1',
+            value: JSON.stringify(data),
+            complete: function () {
+              // 通知主游戏页返回时重新载入存档
+              storage.set({
+                key: 'darkroom_dirty', value: '1',
+                complete: function () { router.back() }
+              })
+            }
+          })
+        },
+        fail: function () { router.back() }
+      })
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../../settings.css';
+
+  .val-box {
+    justify-content: center;
+    align-items: center;
+    background-color: #111111;
+    border-width: 1px;
+    border-color: #333333;
+    border-radius: 8px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+  }
+
+  .val-text {
+    color: #39d98a;
+    font-size: 44px;
+  }
+
+  .pad {
+    flex-direction: column;
+  }
+
+  .pad-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .pad-key {
+    width: 100px;
+    height: 80px;
+    justify-content: center;
+    align-items: center;
+    background-color: #1a1a1a;
+    border-width: 1px;
+    border-color: #333333;
+    border-radius: 8px;
+  }
+
+  .pad-key-text {
+    color: #ffffff;
+    font-size: 34px;
+  }
+
+  .save-btn {
+    margin-top: 8px;
+    justify-content: center;
+    align-items: center;
+    background-color: #15301f;
+    border-width: 1px;
+    border-color: #2e6e2e;
+    border-radius: 8px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  .save-text {
+    color: #6fe09a;
+    font-size: 28px;
+  }
+</style>

@@ -1,0 +1,67 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+
+    <text class="title">1. 设置</text>
+    <text class="code">{{htmlStr}}</text> 
+    <div
+      id="elNode1"
+      data-person-name="张三"
+      data-persoin-gender="男"
+      data-city="武汉"
+      data-curr-work-city="北京"
+      data-number="1"
+      data-boolean="true"
+      data-obj="{{obj}}"
+      data-val-null="{{null}}"
+      data-val-undefined="{{undefined}}"
+    ></div>
+
+    <text class="title">2. 获取</text>
+    <text class="code">this.$element('elNode1')</text>
+    <text class="label">获取结果：{{dataset}}</text>
+    <text class="label">name: {{name}} version: {{version}}</text>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      dataset: '',
+      obj: {name: 'vela', version: '1.0.0'},
+      name: '',
+      version: '',
+      htmlStr: [
+        'id="elNode1"',
+        'data-person-name="ZhangSan"',
+        'data-persoin-gender="男"',
+        'data-city="WuHan"',
+        'data-curr-work-city="WuHan"',
+        'data-number="{{1}}"',
+        'data-boolean="{{true}}"',
+        'data-obj="{{obj}}"',
+        'data-val-null="{{null}}"',
+        'data-val-undefined="{{undefined}}"'
+      ].join('\n')
+    },
+
+    onReady() {
+      const el = this.$element('elNode1')
+      const elData = el.dataset;
+
+      this.dataset = JSON.stringify(elData, null, 2);
+      this.name = elData.obj.name;
+      this.version = elData.obj.version;
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../common/comm.css';
+</style>

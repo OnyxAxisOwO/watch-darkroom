@@ -1,0 +1,44 @@
+<template>
+  <div class="page column">
+    <text class="back" @click="back">返回</text>
+    <text class="header" style="text-align: center;">postcss</text>
+    <text class="title">引入postcss-color-mix插件混合颜色，如mix(#f00, #00f) 组合为 #800080</text>
+    <text style="margin-top: 20px;">
+      <span class="color-red">红色</span>
+      <span>+</span>
+      <span class="color-blue">蓝色</span>
+      <span>=</span>
+      <span class="color-mix">紫色</span>
+      </text>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    onReady() {
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style lang="postcss">
+  @import '../../../style/comm.css';
+  .title{
+    font-size: 18px;
+  }
+  .color-red{
+    color: #f00;
+  }
+  .color-blue{
+    color: #00f;
+  }
+  .color-mix{
+    color: mix(#f00, #00f); /*#800080*/
+  }
+  
+</style>

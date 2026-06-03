@@ -1,0 +1,117 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text if="{{errMsg}}" class="errmsg">{{errMsg}}</text>
+    <text class="header">1. 获取最新数据</text>
+    <div class="column group">
+      <text if="{{recentDataStr}}">获取到的数据: {{recentDataStr}}</text>
+      <input type="button" class="btn" onclick="getRecentSamples" value="获取最新数据" />
+    </div>
+    <text class="header">2. 监听数据变化</text>
+    <div class="column group">
+      <text if="{{changedHr}}">最新数据: {{changedHr}}</text>
+      <input type="button" class="btn" onclick="subscribe" value="监听数据变化" />
+    </div>
+
+    <text class="header">3. 取消监听数据变化</text>
+    <div class="column group">
+      <input type="button" class="btn" onclick="unsubscribe" value="取消监听数据变化" />
+    </div>
+
+    <text class="header">4. 获取心率</text>
+    <div class="column group">
+      <input type="button" class="btn" onclick="testGetHr" value="请点击获取心率" />
+    </div>
+    <text>心率： {{heartRate}}</text>
+
+    <text class="header">5. 退出APP</text>
+    <div class="column group">
+      <input type="button" class="btn" onclick="exit" value="退出APP" />
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import health from '@service.health'
+  import app from '@system.app'
+
+  const DATA_TYPES = {
+    HEART_RATE: 0
+  };
+
+  export default {
+    private: {
+      recentDataStr: "{}",
+      recentData: {},
+      errMsg: '',
+      changedHr: '',
+      heartRate:''
+    },
+    onReady() {
+
+    },
+    testGetHr() {
+      this.heartRate = health.getHr();
+    },
+    //获取最新数据
+    getRecentSamples() {
+      const self = this;
+
+      health.getRecentSamples({
+        dataTypes: [DATA_TYPES.HEART_RATE],
+        success: function (data) {
+          console.log(JSON.stringify(data))
+          console.log(`数据获取成功: ${JSON.stringify(data)}`)
+          self.recentDataStr = JSON.stringify(data);
+        },
+        fail: function(err) {
+          console.log('数据获取失败:', err);
+          self.errMsg = err.message || err;
+        },
+        complete: function() {
+          console.log('数据获取完成');
+        }
+      })
+    },
+    //监听网络连接状态
+    subscribe() {
+      let self = this;
+
+      health.subscribeSample({
+        dataType: DATA_TYPES.HEART_RATE,
+        callback: function (data) {
+          console.log('心率数据改变:', data);
+          self.changedHr = JSON.stringify(data);
+        }
+      })
+    },
+    //取消监听网络连接状态
+    unsubscribe() {
+      health.unsubscribeSample({
+        dataType: DATA_TYPES.HEART_RATE
+      })
+    },
+
+    back() {
+      router.back();
+    },
+
+    exit() {
+      app.terminate();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+
+  .btn {
+    width: 360px;
+    margin-left: 0;
+  }
+
+  .errmsg {
+    color: red;
+  }
+</style>

@@ -1,0 +1,34 @@
+<template>
+  <div class="page home-page">
+    <text class="back" @click="back">返回</text>
+    <div class="container">
+      <marquee id="marquee1" class="marquee-style" scrollamount="60">scrollamount控制滚动速度，当前为60（60像素/秒）</marquee>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+    },
+    onReady() {
+      this.$element('marquee1').start();
+    },
+    back() {
+      router.back();
+    },
+  }
+</script>
+
+<style>
+  @import "../../../style/comm.css";
+  .container {
+    margin-top: 20px;
+  }
+  .marquee-style{
+    color:blueviolet;
+    font-size: 30px;
+  }
+</style>

@@ -1,0 +1,58 @@
+<template>
+  <div class="page home-page">
+    <text class="back" @click="back">返回</text>
+    <div class="container column">
+      <div class="slider-wrap">
+        <slider
+          id="sliderId"
+          class="slider-style"
+          min="0"
+          max="100"
+          step="10"
+          value="{{ sliderValue }}"
+          onchange="handleSliderChange"
+        ></slider>
+      </div>
+      <text style="margin-bottom: 20px"
+        >slider即value 的值：{{ curSliderValue }}</text
+      >
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from "@system.router";
+
+  export default {
+    private: {
+      sliderValue: 10,
+      curSliderValue: 10,
+    },
+
+    back() {
+      router.back();
+    },
+    handleSliderChange(e) {
+      this.curSliderValue = e.progress;
+    },
+  };
+</script>
+
+<style>
+  @import "../../../style/comm.css";
+  .container {
+    margin-top: 20px;
+  }
+  .slider-wrap {
+    width: 100%;
+    height: 50px;
+    align-items: center;
+  }
+  .slider-style {
+    width: 100%;
+    block-color: #009900;
+    selected-color: #009900;
+    color: gray;
+    /* height: 50px; */
+  }
+</style>

@@ -1,0 +1,42 @@
+
+.list {
+  flex-direction: column;
+}
+
+.item {
+  height: 160px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 36px;
+  margin-top: 12px;
+}
+
+.item-icon {
+  width: 136px;
+  height: 136px;
+  flex-shrink: 0;
+  border-radius: 28px;
+  background-color: #242525;
+}
+
+.detail {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  flex-direction: column;
+  margin-left: 20px;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.item-title {
+  font-size: 30px;
+  max-height: 80px;
+  color: #ffffff;
+  text-overflow: ellipsis;
+}
+
+.item-subtitle {
+  font-size: 28px;
+  line-height: 37px;
+  color: rgba(255, 255, 255, 0.4);
+}

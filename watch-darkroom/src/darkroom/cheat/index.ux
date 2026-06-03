@@ -1,0 +1,89 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title s-danger">作弊设置</text>
+
+      <div class="warn-box">
+        <text class="warn-text">注意：直接修改资源数值会严重影响游戏平衡度，并可能引发 bug。请谨慎使用。</text>
+      </div>
+
+      <text class="s-desc">点击任意资源进入编辑页，用小键盘修改数量。</text>
+
+      <div class="s-row" for="{{item in list}}" @click="edit(item.key, item.name)">
+        <text class="s-row-label">{{item.name}}</text>
+        <text class="s-row-sub">{{item.value}} ›</text>
+      </div>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+
+  var RES = [
+    { key: 'wood', name: '木头' },
+    { key: 'fur', name: '毛皮' },
+    { key: 'meat', name: '肉' },
+    { key: 'scales', name: '鳞片' },
+    { key: 'teeth', name: '牙齿' },
+    { key: 'cloth', name: '布料' },
+    { key: 'charm', name: '符咒' }
+  ]
+
+  export default {
+    private: {
+      list: []
+    },
+    onShow() {
+      var self = this
+      storage.get({
+        key: 'darkroom_save_v1',
+        success: function (val) {
+          var stores = {}
+          if (val) {
+            try { stores = (JSON.parse(val).stores) || {} } catch (e) { }
+          }
+          var list = []
+          for (var i = 0; i < RES.length; i++) {
+            var r = RES[i]
+            list.push({ key: r.key, name: r.name, value: stores[r.key] || 0 })
+          }
+          self.list = list
+        },
+        fail: function () {
+          var list = []
+          for (var i = 0; i < RES.length; i++) list.push({ key: RES[i].key, name: RES[i].name, value: 0 })
+          self.list = list
+        }
+      })
+    },
+    edit(key, name) {
+      router.push({ uri: 'darkroom/cheat/edit', params: { key: key, name: name } })
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../settings.css';
+
+  .warn-box {
+    background-color: #2a1010;
+    border-width: 1px;
+    border-color: #5a1a1a;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .warn-text {
+    color: #e08080;
+    font-size: 22px;
+    line-height: 32px;
+  }
+</style>

@@ -1,0 +1,78 @@
+/* 设置相关页面统一样式（固定深色，不随游戏主题变化） */
+.s-root {
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  background-color: #000000;
+}
+
+.s-body {
+  flex: 1;
+  flex-direction: column;
+  padding-left: 48px;
+  padding-right: 48px;
+  padding-top: 40px;
+  padding-bottom: 56px;
+}
+
+.s-title {
+  color: #ffffff;
+  font-size: 32px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.s-desc {
+  color: #aaaaaa;
+  font-size: 22px;
+  line-height: 32px;
+  margin-bottom: 16px;
+}
+
+.s-row {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1a1a1a;
+  border-width: 1px;
+  border-color: #333333;
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  min-height: 48px;
+}
+
+.s-row-label {
+  color: #ffffff;
+  font-size: 28px;
+}
+
+.s-row-sub {
+  color: #888888;
+  font-size: 22px;
+}
+
+.s-check {
+  color: #39d98a;
+  font-size: 28px;
+}
+
+.s-back {
+  margin-top: 16px;
+  justify-content: center;
+  align-items: center;
+  border-width: 1px;
+  border-color: #333333;
+  border-radius: 8px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.s-back-text {
+  color: #aaaaaa;
+  font-size: 26px;
+}
+
+.s-danger {
+  color: #e05050;
+}

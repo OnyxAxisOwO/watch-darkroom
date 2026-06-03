@@ -1,0 +1,89 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1. getLocation</text>
+    <div class="column group">
+      <input type="button" class="btn" onclick="getLocation" value="获取地理位置" />
+      <text>longitude:{{locationInfo.longitude}}</text>
+      <text>latitude:{{locationInfo.latitude}}</text>
+      <text>altitude:{{locationInfo.altitude}}</text>
+      <text>speed:{{locationInfo.speed}}</text>
+      <text>accuracy:{{locationInfo.accuracy}}</text>
+    </div>
+    <text class="header">2. setSubscribe</text>
+    <div class="column group">
+      <input type="button" class="btn" onclick="setSubscribe" value="订阅地理位置" />
+      <text>longitude:{{subscribedInfo.longitude}}</text>
+      <text>latitude:{{subscribedInfo.latitude}}</text>
+      <text>altitude:{{subscribedInfo.altitude}}</text>
+      <text>speed:{{subscribedInfo.speed}}</text>
+      <text>accuracy:{{subscribedInfo.accuracy}}</text>
+    </div>
+    <text class="header">3. unsubscribe</text>
+    <div class="column group">
+      <input type="button" class="btn" onclick="unsubscribe" value="取消订阅地理位置" />
+    </div>
+  </div>
+</template>
+
+<script>
+  import geolocation from '@system.geolocation'
+  import router from '@system.router'
+
+  export default {
+    private: {
+      locationInfo: {
+        longitude: '',
+        latitude: '',
+        altitude: '',
+        speed: '',
+        accuracy: ''
+      },
+      subscribedInfo: {
+        longitude: '',
+        latitude: '',
+        altitude: '',
+        speed: '',
+        accuracy: ''
+      }
+    },
+    getLocation() {
+      const _this = this
+      geolocation.getLocation({
+        success: function(data) {
+          const keys = Object.keys(_this.locationInfo)
+          keys.forEach(item => {
+            if (data[item] !== undefined) _this.locationInfo[item] = data[item]
+          })
+        },
+        fail: function(data, code) {
+          console.log(`handling fail, code = ${code}, errorMsg=${data}`)
+        }
+      })
+    },
+    setSubscribe() {
+      const _this = this
+      geolocation.subscribe({
+        callback: function(data) {
+          const keys = Object.keys(_this.subscribedInfo)
+          keys.forEach(item => {
+            if (data[item] !== undefined) _this.subscribedInfo[item] = data[item]
+          })
+        },
+        fail: function(data, code) {
+          console.log(`handling fail, code = ${code}, errorMsg=${data}`)
+        }
+      })
+    },
+    unsubscribe() {
+      geolocation.unsubscribe()
+    },
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

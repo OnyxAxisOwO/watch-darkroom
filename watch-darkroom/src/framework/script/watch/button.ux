@@ -1,0 +1,29 @@
+<template>
+  <div class="column">
+    <text class="btn" @click="childBtnClick">子组件按钮</text>
+    <text class="code">子组件监听结果：{{result3}}</text>
+  </div>
+</template>
+
+<script>
+
+  export default {
+    props: ['childCount'],
+    data: {
+      result3: ''
+    },
+    onInit() {
+      this.$watch('childCount', 'handleChildCountChange')
+    },
+    childBtnClick() {
+      this.$emit('childBtnClick')
+    },
+    handleChildCountChange() {
+      this.result3 = `parent props base type changed ${this.childCount}`
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

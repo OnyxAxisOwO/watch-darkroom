@@ -1,0 +1,153 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header" @click="getDevInfo">1.点击获取设备信息</text>
+    <div class="column group">
+      <text>设备信息:</text>
+      <text>{{deviceInfo}}</text>
+    </div>
+    <text class="header" @click="getDevId">2.点击获取设备唯一标识</text>
+    <div class="column group">
+      <text>设备唯一标识:</text>
+      <text>{{devId}}</text>
+    </div>
+<!--    <text class="header" @click="getIds">3.点击批量获取设备标识</text>-->
+<!--    <div class="column group">-->
+<!--      <text>批量设备标识:</text>-->
+<!--      <text>{{devIds}}</text>-->
+<!--    </div>-->
+    <text class="header" @click="getDevSerial">3.点击获取设备序列号</text>
+    <div class="column group">
+      <text>设备序列号:</text>
+      <text>{{devSerial}}</text>
+    </div>
+    <text class="header" @click="getTotalSpace">4.点击获取存储空间的总大小</text>
+    <div class="column group">
+      <text>存储空间的总大小:</text>
+      <text>{{devTotalSpace}} Byte</text>
+    </div>
+    <text class="header" @click="getAvailableSpace">5.点击获取存储空间的可用大小</text>
+    <div class="column group">
+      <text>存储空间的可用大小:</text>
+      <text>{{devAvailSpace}} Byte</text>
+    </div>
+
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import device from '@system.device'
+
+  export default {
+    private: {
+      deviceInfo: "",
+      devId: "",
+      devIds: "",
+      devSerial: '',
+      devTotalSpace: '',
+      devAvailSpace: ''
+    },
+    onReady() {
+    },
+
+    getDevInfo() {
+      device.getInfo({
+        success: (data) => {
+          this.deviceInfo = JSON.stringify(data, null, 2)
+          console.log(`handling success ret: = ${JSON.stringify(data, null, 2)}`)
+        },
+        fail: function(data, code) {
+          console.log(`getInfo handling fail, data = ${data}, code = ${code}`)
+        },
+        complete: function() {
+          console.log(`getInfo completed`)
+        }
+      })
+    },
+
+    getDevId() {
+      device.getDeviceId({
+        success: (data) => {
+          this.devId = data.deviceId;
+          console.log(`handling success ret: = ${JSON.stringify(data, null, 2)}`);
+        },
+        fail: function(data, code) {
+          console.log(`handling fail, data = ${data}, code = ${code}`);
+        },
+        complete: function() {
+          console.log(`getDeviceId completed`);
+        }
+      })
+    },
+
+    // getIds() {
+    //   device.getId({
+    //     type: ['device', 'mac'],
+    //     success: (data) => {
+    //       this.devIds = JSON.stringify(data, null, 2);
+    //       console.log(`handling success: ${data}`)
+    //     },
+    //     fail: function(data, code) {
+    //       console.log(`handling fail, code = ${code}, errorMsg=${data}`)
+    //     },
+    //     complete: function() {
+    //       console.log(`getId completed`);
+    //     }
+    //   })
+    // },
+
+    getDevSerial() {
+      device.getSerial({
+        success: (data) => {
+          this.devSerial = data.serial;
+          console.log(`handling success: ${data.serial}`)
+        },
+        fail: function(data, code) {
+          console.log(`handling fail, code = ${code} errorMsg=${data}`)
+        },
+        complete: function() {
+          console.log(`getSerial completed`);
+        }
+      })
+    },
+
+    getTotalSpace() {
+      device.getTotalStorage({
+        success: (data) => {
+          this.devTotalSpace = data.totalStorage;
+          console.log(`handling success: ${data.totalStorage}`)
+        },
+        fail: function(data, code) {
+          console.log(`handling fail, code = ${code} data = ${data}`)
+        },
+        complete: function() {
+          console.log(`getTotalStorage completed`);
+        }
+      })
+    },
+
+    getAvailableSpace() {
+      device.getAvailableStorage({
+        success: (data) => {
+          this.devAvailSpace = data.availableStorage;
+          console.log(`handling success: ${data.availableStorage}`)
+        },
+        fail: function(data, code) {
+          console.log(`handling fail, code = ${code}, data = ${data}`)
+        },
+        complete: function() {
+          console.log(`getAvailableStorage completed`);
+        }
+      })
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

@@ -1,0 +1,89 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1. 屏幕亮度 brightness</text>
+    <div class="column group">
+      <input type="button" class="btn" onclick="getValue" value="获取亮度" />
+      <input type="button" class="btn" onclick="setValue" value="设置亮度" />
+      <input type="button" class="btn" onclick="getMode" value="获取模式" />
+      <input type="button" class="btn" onclick="setMode" value="设置模式" />
+      <input type="button" class="btn" onclick="setKeepScreenOn" value="设置常亮" />
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import brightness from '@system.brightness'
+
+  export default {
+    onReady() {
+
+    },
+    //获得当前屏幕亮度值
+    getValue() {
+      brightness.getValue({
+        success: function (data) {
+          console.log(`handling success, value = ${data.value}`)
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //设置当前屏幕亮度值
+    setValue() {
+      brightness.setValue({
+        value: 100,
+        success: function () {
+          console.log('handling success')
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //获得当前屏幕亮度模式
+    getMode() {
+      brightness.getMode({
+        success: function (data) {
+          console.log(`handling success, mode = ${data.mode}`)
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //设置当前屏幕亮度模式
+    setMode() {
+      brightness.setMode({
+        mode: 1,
+        success: function () {
+          console.log('handling success')
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    //设置是否保持常亮状态
+    setKeepScreenOn() {
+      brightness.setKeepScreenOn({
+        keepScreenOn: true,
+        success: function () {
+          console.log('handling success')
+        },
+        fail: function (data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+    },
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

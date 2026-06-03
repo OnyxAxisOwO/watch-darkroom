@@ -1,0 +1,64 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1. 上传下载 request</text>
+    <div class="column group">
+      <text>下载的token：{{token}}</text>
+      <input type="button" class="btn" onclick="download" value="下载文件" />
+      <text>下载文件的Uri：{{fileDownloadData}}</text>
+      <input type="button" class="btn" onclick="onDownloadComplete" value="监听下载任务" />
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import request from '@system.request'
+
+  export default {
+    private: {
+      token: '',
+      fileDownloadData: '',
+    },
+    onReady() {
+
+    },
+    //下载文件
+    download() {
+      const self = this
+      // 下载文件
+      request.download({
+        url: 'https://www.quickapp.cn/assets/images/home/logo_quickApp.png',
+        description: '一个网络图片', // 指定描述
+        filename: 'quickappLogo.png', // 指定文件名
+        success: function (ret) {
+          self.token = ret.token
+          console.info(`### request.download ### ${JSON.stringify(ret)}`)
+        }
+      })
+    },
+    //监听下载任务
+    onDownloadComplete() {
+      const self = this
+      request.onDownloadComplete({
+        token: self.token,
+        success: function (ret) {
+          self.fileDownloadData = ret.uri
+        },
+        fail: function (msg, code) {
+          console.info(`### request.onDownloadComplete ### ${code}: ${msg}`)
+          prompt.showToast({
+            message: `${code}: ${msg}`
+          })
+        }
+      })
+    },
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

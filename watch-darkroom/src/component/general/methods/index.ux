@@ -1,0 +1,57 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+
+    <text class="title">1. element()</text>
+    <div class="column group">
+      <div class="box" id="box1" @click="getRect">
+        <text>点击获取</text>
+      </div>
+      <text class="code">{{box1}}</text>
+    </div>
+
+    <text class="title">2. getBoundingClientRect()</text>
+    <div class="column group">
+      <div class="box" id="box1" @click="getRect">
+        <text>点击获取</text>
+      </div>
+      <text class="code">{{box1info}}</text>
+    </div>
+
+    <div style="height: 500px"></div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      box1: '',
+      box1info: '',
+    },
+
+    getRect() {
+      let box1 = this.$element('box1');
+
+      this.box1 = box1;
+
+      box1.getBoundingClientRect({
+        success: (data) => {
+          this.box1info = JSON.stringify(data);
+        },
+        fail: (errorData, errorCode) => {
+          this.box1info = 'Error:' + errorData
+        }
+      });
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../common/comm.css';
+</style>

@@ -1,0 +1,63 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1. 网络状态 network</text>
+    <div class="column group">
+      <text>网络类型:{{netType}}</text>
+      <input type="button" class="btn" onclick="getType" value="获取网络类型" />
+      <input type="button" class="btn" onclick="subscribe" value="监听网络连接状态" />
+      <input type="button" class="btn" onclick="unsubscribe" value="取消监听网络连接状态" />
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import network from '@system.network'
+
+  export default {
+    private: {
+      netType: ''
+    },
+    onReady() {
+
+    },
+    //获取网络类型
+    getType() {
+      const self = this;
+      network.getType({
+        success: function (data) {
+          // 打印data中的键值，确认没有ip字段
+          console.log(JSON.stringify(data))
+
+          self.netType = data.type
+          console.log(`handling success: ${data.type}`)
+        }
+      })
+    },
+    //监听网络连接状态
+    subscribe() {
+      network.subscribe({
+        callback: function (data) {
+          console.log('handling callback')
+        }
+      })
+    },
+    //取消监听网络连接状态
+    unsubscribe() {
+      network.unsubscribe()
+    },
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+
+  .btn {
+    width: 360px;
+    margin-left: 0;
+  }
+</style>

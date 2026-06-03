@@ -1,0 +1,85 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+
+    <text class="title">1. touch事件</text>
+    <div class="column group">
+      <div class="box" @touchstart="touch" @touchmove="touch" @touchend="touch">
+        <text class="white inner-box">点击并滑动</text>
+      </div>
+      <text class="code">{{touchEve}}</text>
+    </div>
+
+    <text class="title">2. click事件</text>
+    <div class="column group">
+      <div class="box" @click="click">
+        <text class="white inner-box">点击</text>
+      </div>
+      <text class="code">{{clickEve}}</text>
+    </div>
+
+    <text class="title">3. longpress事件</text>
+    <div class="column group">
+      <div class="box" @longpress="longpress">
+        <text class="white inner-box">长按</text>
+      </div>
+      <text class="code">{{longpressEve}}</text>
+    </div>
+
+    <text class="title">4. swipe事件</text>
+    <div class="column group">
+      <div class="box" @swipe="swipe">
+        <text class="white inner-box">上下左右滑动</text>
+      </div>
+      <text class="code">{{swipeEve}}</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      touchEve: null,
+      clickEve: null,
+      longpressEve: null,
+      swipeEve: null,
+    },
+
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    },
+
+    touch(eve) {
+      this.touchEve = JSON.stringify(eve);
+    },
+
+    click(eve) {
+      this.clickEve = JSON.stringify(eve);
+    },
+
+    longpress(eve) {
+      this.longpressEve = JSON.stringify(eve);
+    },
+
+    swipe(eve) {
+      this.swipeEve = JSON.stringify(eve);
+    }
+  }
+</script>
+
+<style>
+  @import '../../../common/comm.css';
+
+  .white {color: white}
+  .inner-box {
+    width: 100%;
+    text-align: center;
+    border: 1px solid white;
+  }
+</style>

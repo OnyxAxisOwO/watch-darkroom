@@ -1,0 +1,110 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1. animation</text>
+    <div class="column group">
+      <div class="box fade-in"></div>
+      <div class="box fade-out"></div>
+      <div class="box fade-out1"></div>
+    </div>
+
+    <text class="header">2. animation-timing-function</text>
+    <div class="column group">
+      <text class="label">linear</text>
+      <div class="box fade-out" style="animation-timing-function: linear"></div>
+
+      <text class="label">ease</text>
+      <div class="box fade-out" style="animation-timing-function: ease"></div>
+
+      <text class="label">ease-in</text>
+      <div class="box fade-out" style="animation-timing-function: ease-in"></div>
+
+      <text class="label">ease-out</text>
+      <div class="box fade-out" style="animation-timing-function: ease-out"></div>
+
+      <text class="label">ease-in-out</text>
+      <div class="box fade-out" style="animation-timing-function: ease-in-out"></div>
+
+      <text class="label">cubic-bezier(0.1, -0.6, 0.2, 0)</text>
+      <div class="box fade-out" style="animation-timing-function: cubic-bezier(0.1, -0.6, 0.2, 0)"></div>
+
+      <text class="label">step-start</text>
+      <div class="box fade-out" style="animation-timing-function: step-start"></div>
+
+      <text class="label">step-end</text>
+      <div class="box fade-out" style="animation-timing-function: step-end"></div>
+
+      <text class="label">steps(5, end)</text>
+      <div class="box fade-out" style="animation-timing-function: steps(5, end)"></div>
+
+      <text class="label">steps(5, start)</text>
+      <div class="box fade-out" style="animation-timing-function: steps(5, start)"></div>
+
+      <text class="label">steps(5)</text>
+      <div class="box fade-out" style="animation-timing-function: steps(5)"></div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../../style/comm.css';
+
+  .fade-in {
+    animation-name: fadeIn;
+    animation-timing-function: ease-in-out;
+    animation-duration: 3s;
+    animation-delay: 3s;
+    animation-iteration-count: 1;
+  }
+
+  .fade-out {
+    animation-name: fadeOut;
+    animation-timing-function: ease-in-out;
+    animation-duration: 3s;
+    animation-delay: 3s;
+    animation-iteration-count: 1;
+  }
+
+  .fade-out1 {
+    animation-name: fadeOut;
+    animation-timing-function: ease-in-out;
+    animation-duration: 3s;
+    animation-delay: 3s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+</style>

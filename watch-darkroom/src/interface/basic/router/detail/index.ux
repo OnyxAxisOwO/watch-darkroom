@@ -1,0 +1,30 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1.router 详情页</text>
+    <div class="column group">
+      <text>Detail :{{pageInfo}}</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    protected: {
+      pageInfo: '',
+      pageInfoObject: ''
+    },
+    onReady() {
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../../style/comm.css';
+</style>

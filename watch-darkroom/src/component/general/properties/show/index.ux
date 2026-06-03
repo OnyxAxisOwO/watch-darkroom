@@ -1,0 +1,45 @@
+
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+
+    <text class="header">1. show</text>
+    <div class="group column">
+      <text show="{{true}}">true应该展示</text>
+      <text show="{{1}}">1应该展示</text>
+      <text show="{{'abc'}}">非空字符串应该展示</text>
+      <text show="{{obj}}">对象应该展示</text>
+      <text show="{{emptyObj}}">空对象应该展示</text>
+      <text show="{{[]}}">空数组应该展示</text>
+      <text show="{{[1,2]}}">非空数组应该展示</text>
+      <text class="bug" show="{{false}}">false不应该展示</text>
+      <text class="bug" show="{{0}}">0不应该展示</text>
+      <text class="bug" show="{{''}}">空字符串不应该展示</text>
+      <text class="bug" show="{{null}}">null不应该展示</text>
+      <text class="bug" show="{{undefined}}">undefined不应该展示</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      obj: {a: 1},
+      emptyObj: {},
+      display: false
+    },
+
+    onReady() {
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../../style/comm.css';
+</style>

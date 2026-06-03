@@ -1,0 +1,27 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1. 设备通信 interconnect</text>
+    <div class="column group">
+
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import interconnect from '@system.interconnect'
+  export default {
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

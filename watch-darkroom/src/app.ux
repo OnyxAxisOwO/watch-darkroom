@@ -1,0 +1,57 @@
+<script>
+export default {
+  test() {
+    request.download({
+        url: 'http://t1.market.mi-img.com/download/Mina/0cf7a27dc28bf47ef893b8842be6391f81f6e6eeb',
+        success: function(data) {
+          console.log(`handling success${data.token}`)
+          request.onDownloadComplete({
+            token: data.token,
+            success: function(data) {
+              console.log(`handling success${data.uri}`)
+              that.txt3 = data.uri
+            },
+            fail: function(data, code) {
+              console.log(`handling fail, code = ${code}`)
+              that.txt3 = `failed: ${code}, ${data}`
+            }
+          })
+        },
+        fail: function(data, code) {
+          console.log(`handling fail, code = ${code}`)
+        }
+      })
+  },
+  onCreate() {
+    console.log('[lifecycle] [app] onCreate');
+  },
+
+  onShow() {
+    console.log('[lifecycle] [app] onShow');
+  },
+
+  onHide() {
+    console.log('[lifecycle] [app] onHide');
+  },
+
+  onDestroy() {
+    console.log('[lifecycle] [app] onDestroy');
+  },
+
+  onError(err) {
+    console.log(`[lifecycle] [app] onError errmsg: ${err.message}`)
+    console.log(`[lifecycle] [app] onError error stack: ${err.stack}`)
+  },
+
+  getID() {
+    return Math.floor(1000000 + Math.random() * 8999999);
+  },
+
+  globalInfo: {
+    package: 'com.xiaomi.vela.demo-test',
+    version: '9.5.27'
+  },
+
+  globalId: '9527'
+}
+</script>

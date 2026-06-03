@@ -1,0 +1,74 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="title">1. 使用animation</text>
+    <div class="column group">
+      <div class="ball move-right" style="animation-timing-function: linear;"></div>
+      <div class="ball move-right" style="animation-timing-function: ease-in;"></div>
+      <div class="ball move-right" style="animation-timing-function: ease-in-out;"></div>
+      <div class="ball move-right" style="animation-timing-function: ease-out;"></div>
+    </div>
+
+    <text class="title">2. 使用transition</text>
+    <div class="column group" style="height: 50px;">
+      <div class="ball transition-ani" style="opacity: {{opacity}}"></div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    public: {
+      opacity: 0,
+    },
+
+    onReady() {
+      setTimeout(() => {
+        this.opacity = 1
+      }, 500)
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../common/comm.css';
+
+  .ball {
+    width: 30px;
+    height: 30px;
+    border-radius: 25px;
+    background-color: purple;
+    margin-left: 0;
+    margin-bottom: 10px;
+  }
+
+  .move-right {
+    animation-name: moveRight;
+    animation-duration: 3s;
+    animation-delay: 0.5s;
+  }
+
+  @keyframes moveRight {
+    from {
+      opacity: 0;
+      transform: translateX(0);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(380px);
+    }
+  }
+
+  .transition-ani {
+    transition-property: opacity;
+    transition-duration: 3s;
+    transition-timing-function: ease-out;
+  }
+</style>

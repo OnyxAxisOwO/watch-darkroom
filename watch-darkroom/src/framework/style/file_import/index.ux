@@ -1,0 +1,27 @@
+<template>
+  <div class="page column">
+    <text class="back" @click="back">返回</text>
+
+    <text class="header">1. 通过style src导入的规则</text>
+    <div class="column group">
+      <div class="box"></div>
+      <text class="tips">上面的盒子应该是200*80，紫色</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style src="../../../style/comm.css"></style>

@@ -1,0 +1,89 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title">设置</text>
+
+      <div class="s-row" @click="go('darkroom/theme')">
+        <text class="s-row-label">配色主题</text>
+        <text class="s-row-sub">{{themeName}} ›</text>
+      </div>
+
+      <div class="s-row" @click="go('darkroom/speed')">
+        <text class="s-row-label">游戏倍速</text>
+        <text class="s-row-sub">{{speedLabel}} ›</text>
+      </div>
+
+      <div class="s-row" @click="go('darkroom/commute')">
+        <text class="s-row-label">通勤设置</text>
+        <text class="s-row-sub">爆率 ›</text>
+      </div>
+
+      <div class="s-row" @click="go('darkroom/cheat')">
+        <text class="s-row-label s-danger">作弊设置</text>
+        <text class="s-row-sub">›</text>
+      </div>
+
+      <div class="s-row" @click="go('darkroom/guide')">
+        <text class="s-row-label">游戏攻略</text>
+        <text class="s-row-sub">›</text>
+      </div>
+
+      <div class="s-row" @click="go('darkroom/about')">
+        <text class="s-row-label">关于</text>
+        <text class="s-row-sub">›</text>
+      </div>
+
+      <div class="s-row" @click="go('darkroom/dev')">
+        <text class="s-row-label s-danger">开发者设置</text>
+        <text class="s-row-sub">仅测试 ›</text>
+      </div>
+
+      <div class="s-row" @click="go('darkroom/reset')">
+        <text class="s-row-label s-danger">重置游戏数据</text>
+        <text class="s-row-sub">›</text>
+      </div>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回游戏</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+  import { THEMES, SPEEDS } from '../themes.js'
+
+  export default {
+    private: {
+      themeName: THEMES[0].name,
+      speedLabel: '1.0x'
+    },
+    onShow() {
+      var self = this
+      storage.get({
+        key: 'darkroom_theme',
+        success: function (v) {
+          var i = parseInt(v, 10)
+          if (!isNaN(i) && THEMES[i]) self.themeName = THEMES[i].name
+        }
+      })
+      storage.get({
+        key: 'darkroom_speed',
+        success: function (v) {
+          var s = parseFloat(v)
+          for (var i = 0; i < SPEEDS.length; i++) {
+            if (SPEEDS[i].value === s) { self.speedLabel = SPEEDS[i].label; return }
+          }
+        }
+      })
+    },
+    go(uri) { router.push({ uri: uri }) },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../settings.css';
+</style>

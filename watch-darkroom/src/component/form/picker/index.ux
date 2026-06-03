@@ -1,0 +1,149 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="tips">picker必须设置宽高才能显示</text>
+    <text class="header">1.普通单列选择器</text>
+    <text>color，默认为白色</text>
+    <div>
+      <picker class="picker_default" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1"></picker>
+    </div>
+    <text>设置color=black;border=1px solid black;background-color=black;样式后</text>
+    <div>
+      <picker class="picker" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1"
+        @change="handlePickerChange"></picker>
+      <text class="gutter">当前选择：{{pickerValue}}</text>
+    </div>
+
+    <text class="header">2.时间选择器</text>
+    <div>
+      <picker class="picker" type="time" value="{{time}}" selected="11:36" @change="handleTimeChange"></picker>
+      <text class="gutter">当前选择：{{time}}</text>
+    </div>
+
+    <text class="header">3.通用属性</text>
+    <text style="color: cadetblue;margin-top: 10px;">for属性</text>
+    <picker class="picker" style="margin-top: 10px;" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1" for="{{dataList}}"></picker>
+    <text style="color: cadetblue;margin-top: 10px;">show属性(show=false)</text>
+    <picker class="picker" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1" show="{{show_picker}}"></picker>
+    <text style="color: cadetblue;margin-top: 10px;">if属性(if=true)</text>
+    <picker class="picker" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1" if="{{if_picker}}"></picker>
+    <text style="color: cadetblue;margin-top: 10px;">if属性(if=false)</text>
+    <picker class="picker" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1" if="{{false}}"></picker>
+
+    <text class="header">4.通用样式</text>
+    <text style="color: cadetblue;">type=text</text>
+    <picker class="picker_style" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1"></picker>
+
+    <text style="color: cadetblue;">type=time</text>
+    <picker class="picker_style" type="time" value="{{time}}" selected="11:36"></picker>
+
+    <text style="color: cadetblue;">display=none</text>
+    <picker class="picker_style" style="display: none;" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1"></picker>
+
+    <text style="color: cadetblue;">visibility=hidden</text>
+    <picker class="picker_style" style="visibility: hidden;" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1"></picker>
+
+    <text style="color: cadetblue;">visibility=visible</text>
+    <picker class="picker_style" style="visibility: visible;" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1"></picker>
+
+    <text style="color: cadetblue;">relative(right=20px,top=20px;left=20px,bottom=20px)</text>
+    <div style="width: 100%;height: 300px;border: 1px solid black;">
+      <picker class="picker_style" style="position: relative;right: 20px;top: 20px;width: 100px;" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1"></picker>
+      <picker class="picker_style" style="position: relative;left: 20px;bottom: 20px;width: 100px;" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1"></picker>
+    </div>
+
+    <text style="color: cadetblue;">absolute(left=10px,top=10px;right=10px,bottom=10px)</text>
+    <div style="width: 300px;height: 300px;border: 1px solid black;">
+      <picker class="picker_style" style="position: absolute;left: 10px;top: 10px;" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1"></picker>
+      <picker class="picker_style" style="position: absolute;right: 10px;bottom: 10px;" type="text" range="{{pickerList}}" value="{{pickerValue}}" selected="1"></picker>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      pickerList: ['apple', 'peach', 'pear', 'banana'],
+      pickerValue: 'peach',
+      time: '11:36',
+      multiPickerList: [['apple', 'peach', 'pear', 'banana'], ['June', 'Mike', 'Alice', 'Cindy']],
+      multiPickerValue: ['apple', 'June'],
+      dateValue: '2021-10-10',
+      dataList:[1,2,3],
+      if_picker:true,
+      show_picker:false,
+    },
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    },
+    handlePickerChange(e) {
+      this.pickerValue = e.newValue
+    },
+    handleTimeChange(e) {
+      console.log("打印当前value:", e)
+      this.time = e.hour+":"+e.minute
+      console.log(this.time)
+    },
+    handleMultiPickerChange(e) {
+      this.multiPickerValue = e.newValue
+    },
+    handleDateChange(e) {
+      this.dateValue = e.newValue
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+
+  text{
+    font-size: 20px;
+  }
+  .picker_default {
+    width: 100px;
+    height: 40px;
+    border: 1px solid grey;
+    color: rgba(0, 0, 0, 0.39);
+    font-size: 20px;
+    selected-color: rgb(0, 0, 0);
+    selected-font-size: 12px;
+    /* background-color: grey; */
+  }
+
+  .picker {
+    width: 100px;
+    height: 40px;
+    color: black;
+    border: 1px solid black;
+    background-color: black;
+  }
+
+  .gutter {
+    margin-left: 10px;
+  }
+  .picker_style{
+    width: 200px;
+    height: 60px;
+    min-width: 30px;
+    max-width: 300px;
+    min-height: 200px;
+    max-height: 300px;
+    border:5px solid blueviolet;
+    border-radius: 10px;
+    margin: 20px;
+    /* background-color: cadetblue; */
+    background-image: url('/common/img2.png');
+    /* padding-left: 100px; */
+    /* padding-right: 100px; */
+    padding-top: 100px;
+    /* padding: 50px; */
+    color: black;
+    opacity: 0.4;
+  }
+</style>

@@ -1,0 +1,361 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1. index 当前显示的子组件索引</text>
+    <div class="swiper-container">
+      <swiper class="swiper swiper-animation" index="{{currentIndex}}" @change="handleChangIndex">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item colorC">C</text>
+      </swiper>
+    </div>
+    <text>index：{{currentIndex}}</text>
+    <text class="header">2. autoplay=true ，interval=1000ms</text>
+    <div>
+      <swiper class="swiper swiper-animation" autoplay="true" interval="1000">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item color-2">C</text>
+      </swiper>
+    </div>
+    <text class="header">3. loop=false</text>
+    <div>
+      <swiper class="swiper swiper-animation" loop="false">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item colorC">C</text>
+        <text class="swiper-item colorD">D</text>
+      </swiper>
+    </div>
+
+    <text class="header">4. indicator=false</text>
+    <div>
+      <swiper class="swiper swiper-animation" indicator="false">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item color-2">C</text>
+      </swiper>
+    </div>
+
+    <text class="header">5. duration=2000ms</text>
+    <div>
+      <swiper class="swiper swiper-animation" duration="2000ms">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item color-2">C</text>
+      </swiper>
+    </div>
+    <text class="header">6. vertical=true </text>
+    <div>
+      <swiper class="swiper swiper-animation" vertical="true">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item colorC">C</text>
+      </swiper>
+    </div>
+    <text>与autoplay，interval一起使用</text>
+    <div>
+      <swiper class="swiper swiper-animation" autoplay="true" interval="1000" loop="false" vertical="true">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item colorC">C</text>
+      </swiper>
+    </div>
+
+    <text class="header">7. previousmargin=30px，nextmargin=20px </text>
+    <div>
+      <swiper class="swiper swiper-animation" previousmargin="30px" nextmargin="20px">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item colorC">C</text>
+      </swiper>
+    </div>
+
+    <text class="header">8. previousmargin=30%，nextmargin=20%</text>
+    <div>
+      <swiper class="swiper swiper-animation" previousmargin="30%" nextmargin="20%">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item colorC">C</text>
+      </swiper>
+    </div>
+
+    <text class="header">9. enableswipe 为 false </text>
+    <div>
+      <swiper class="swiper swiper-animation" enableswipe="false">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item color-2">C</text>
+      </swiper>
+    </div>
+
+    <text class="header">10. indicator-color </text>
+    <div>
+      <swiper class="swiper swiper-animation swiper-indicator1">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item color-2">C</text>
+      </swiper>
+    </div>
+
+    <text class="header">11. indicator-selected-color </text>
+    <div>
+      <swiper class="swiper swiper-animation swiper-indicator2">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item color-2">C</text>
+      </swiper>
+    </div>
+
+    <text class="header">12. indicator-size </text>
+    <div>
+      <swiper class="swiper swiper-animation swiper-indicator3">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item color-2">C</text>
+      </swiper>
+    </div>
+    <text class="header">13. indicator-size ,indicator-top/bottom </text>
+    <div class="swipe-indicator-container">
+      <swiper class="swiper swiper-animation swipe-width swiper-indicator3 swiper-indicatorTop">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item color-2">C</text>
+      </swiper>
+
+      <swiper class="swiper swiper-animation swipe-width swiper-indicator3 swiper-indicatorBottom">
+        <text class="swiper-item color-2">A</text>
+        <text class="swiper-item color-3">B</text>
+        <text class="swiper-item color-2">C</text>
+      </swiper>
+    </div>
+    <text class="header">14. indicator-size ,indicator-left </text>
+    <swiper class="swiper swiper-animation swiper-indicator3 swiper-indicatorLeft">
+      <text class="swiper-item color-2">A</text>
+      <text class="swiper-item color-3">B</text>
+      <text class="swiper-item color-2">C</text>
+    </swiper>
+    <text class="header">15. indicator-size ,indicator-right </text>
+    <swiper class="swiper swiper-animation swiper-indicator3 swiper-indicatorRight">
+      <text class="swiper-item color-2">A</text>
+      <text class="swiper-item color-3">B</text>
+      <text class="swiper-item color-2">C</text>
+    </swiper>
+    <text class="header">16. swipestart 事件 </text>
+    <swiper class="swiper swiper-animation" @swipestart="handleSwipeStart">
+      <text class="swiper-item color-2">A</text>
+      <text class="swiper-item color-3">B</text>
+      <text class="swiper-item color-2">C</text>
+    </swiper>
+    <text class="header">17. swipeend 事件 </text>
+    <swiper class="swiper swiper-animation" @swipeend="handleSwipeEnd">
+      <text class="swiper-item color-2">A</text>
+      <text class="swiper-item color-3">B</text>
+      <text class="swiper-item color-2">C</text>
+    </swiper>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      pickerList: ['apple', 'peach', 'pear', 'banana'],
+      pickerValue: 'peach',
+      currentIndex: 1,
+      curIndex: -1,
+      productList: [
+        {
+          name: '衣服',
+          price: '100',
+        }, 
+        {
+          name: '裤子',
+          price: '200',
+        },
+        {
+          name: '上衣',
+          price: '150',
+        }
+      ],
+      switchValue: true,
+      sliderValue: 10,
+    },
+    onReady() {
+    },
+
+    back() {
+      router.back();
+    },
+    swiperChange(e) {
+      console.log(e)
+      this.curIndex = e.index
+    },
+    handleChangIndex(e) {
+      this.currentIndex = e.index
+    },
+    handleTouchStart(eve){
+      console.log('touchstart:');
+      console.log(eve);
+    },
+    handleTouchmove(eve){
+      console.log('touchmove:');
+      console.log(eve);
+    },
+    handleTouchend(eve){
+      console.log('touchend');
+      console.log(eve);
+    },
+    handleClick(eve){
+      console.log('click');
+      console.log(eve);
+    },
+    handleLongpress(eve){
+      console.log('longpress');
+      console.log(eve);
+    },
+    handleSwipe(eve){
+      console.log('swipe');
+      console.log(eve);
+    },
+    handleSwipeStart(eve){
+      console.log('swipestart');
+      console.log(eve);
+    },
+    handleSwipeEnd(eve){
+      console.log('swipeend');
+      console.log(eve);
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+  .swiper {
+    width: 300px;
+    height: 100px;
+    border:1px solid black;
+
+    /* padding-top: 20px;
+    padding-left: 20px;
+    padding-bottom: 30px; */
+  }
+  .image-size{
+    width: 80px;
+    height: 80px;
+  }
+
+  .swiper-indicator1 {
+    indicator-color: rgba(128, 0, 107, 0.856);
+  }
+
+  .swiper-indicator2 {
+    indicator-selected-color: blue;
+  }
+
+  .swiper-indicator3 {
+    indicator-size: 10px;
+  }
+
+  .swiper-indicatorTop {
+    indicator-top: 10px;
+  }
+
+  .swiper-indicatorLeft {
+    indicator-left: 10px;
+  }
+
+  .swiper-indicatorRight {
+    indicator-right: 10px;
+  }
+
+  .swiper-indicatorBottom {
+    indicator-bottom: 10px;
+  }
+
+  .swipe-indicator-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .swipe-width {
+    width: 40%;
+  }
+
+  .swiper-item {
+    width: 100%;
+    height: 100px;
+    text-align: center;
+  }
+
+  .color-1{
+    background-color: cadetblue;
+  }
+  .color-2 {
+    background-color: orangered;
+  }
+
+  .color-3 {
+    background-color: yellow;
+  }
+
+  .colorC {
+    background-color: blueviolet;
+  }
+
+  .colorD {
+    background-color: rgb(171, 226, 43);
+  }
+  .products-wraper {
+    width: 200px;
+    height: 150px;
+    border-bottom:1px solid black;
+  }
+
+  .product-item {
+    width: 50%;
+    height: 100px;
+    color: white;
+    background-color: rgba(0, 153, 255, 0.603);
+    border: 1px solid red;
+  }
+  .swiper_general{
+    /* min-width: 200px;
+    min-height: 80px; */
+    border: 1px solid black;
+    border-radius: 5px;
+    width: 300px;
+    height: 100px;
+    max-width: 200px;
+    max-height: 80px;
+    padding-top: 20px;
+    padding-left: 30px;
+    padding-bottom: 20px;
+    margin: 50px;
+    background-color: rgb(0, 255, 255);
+    opacity: 0.6;
+    /* color: red; */
+  }
+
+  .swiper_bgImage {
+    border: 1px solid black;
+    border-radius: 5px;
+    width: 300px;
+    height: 100px;
+    max-width: 200px;
+    max-height: 80px;
+    /* padding-top: 20px;
+    padding-left: 30px;
+    padding-bottom: 20px; */
+    /* margin: 50px; */
+    background-image: url('/common/img2.png');
+    position: relative;
+    visibility: visible;
+    /* top: 20px; */
+    /* display:none; */
+    /* flex-direction: column; */
+
+  }
+</style>

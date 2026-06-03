@@ -1,0 +1,51 @@
+<template>
+  <div class="page home-page">
+    <text class="back" @click="back">返回</text>
+
+    <div class="wrap" @click="changeIndex(0)">
+      <image style="width: 50px; height: 50px" if="{{curValue==0}}" src="/common/icon_yes.png"/>
+    </div>
+    <div class="wrap" @click="changeIndex(1)">
+      <image style="width: 50px; height: 50px" if="{{curValue==1}}" src="/common/icon_yes.png"/>
+    </div>
+    <div class="wrap" @click="changeIndex(2)">
+      <image style="width: 50px; height: 50px" if="{{curValue==2}}" src="/common/icon_yes.png"/>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      curValue:2,
+    },
+
+    back() {
+      router.back();
+    },
+    changeIndex(n) {
+      this.curValue = n;
+      console.log(this.curValue);
+    }
+  }
+</script>
+
+<style>
+  @import "../../../style/comm.css";
+
+  .home-page {
+    /* align-items: flex-start; */
+    justify-content: flex-start;
+    padding: 30px;
+    position: relative;
+  }
+
+  .wrap{
+    width: 100%;
+    height: 80px;
+    background-color: cornflowerblue;
+    margin-top: 15px;
+  }
+</style>

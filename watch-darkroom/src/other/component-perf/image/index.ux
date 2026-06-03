@@ -1,0 +1,36 @@
+<template>
+  <div class="page home-page">
+    <text class="back" @click="back">返回</text>
+    <div class="container">
+      <image 
+        class="image-style" 
+        src="https://s02.mifile.cn/assets/static/image/logo-mi2.png" 
+        alt="blank" 
+      />
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+    },
+
+    back() {
+      router.back();
+    },
+  }
+</script>
+
+<style>
+  @import "../../../style/comm.css";
+  .container{
+    margin-top: 20px;
+  }
+  .image-style {
+    width: 100px;
+    height: 100px;
+  }
+</style>

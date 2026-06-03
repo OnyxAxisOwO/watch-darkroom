@@ -1,0 +1,112 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title s-danger">重置游戏</text>
+
+      <text class="reset-warn">此操作会永久删除你的全部存档：火焰、资源、建筑、建造者进度等，且无法恢复。</text>
+      <text class="reset-warn">请确认你真的要重新开始。</text>
+
+      <div class="reset-confirm {{ready ? 'reset-ready' : ''}}" @click="confirm">
+        <text class="reset-confirm-text" if="{{!ready}}">请等待 {{count}} 秒…</text>
+        <text class="reset-confirm-text reset-confirm-on" else>确认重置（不可恢复）</text>
+      </div>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">取消，返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+
+  export default {
+    private: {
+      count: 3,
+      ready: false,
+      done: false
+    },
+    onShow() {
+      // 每次进入页面重新开始 3 秒倒计时
+      this.count = 3
+      this.ready = false
+      this.done = false
+      this._alive = true
+      this.tickCountdown()
+    },
+    // Vela 快应用不保证支持 setInterval，用自循环 setTimeout
+    tickCountdown() {
+      var self = this
+      this._t = setTimeout(function () {
+        if (!self._alive) return
+        self.count--
+        if (self.count <= 0) {
+          self.count = 0
+          self.ready = true
+        } else {
+          self.tickCountdown()
+        }
+      }, 1000)
+    },
+    onHide() {
+      this._alive = false
+      if (this._t) { clearTimeout(this._t); this._t = null }
+    },
+    confirm() {
+      if (!this.ready || this.done) return
+      this.done = true
+      var self = this
+      storage.delete({ key: 'darkroom_save_v1' })
+      // 标记已重置，游戏页返回时据此重新载入空存档
+      storage.set({
+        key: 'darkroom_didReset', value: '1',
+        complete: function () {
+          // 退回到设置页，再退回到游戏页
+          router.back()
+        }
+      })
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../settings.css';
+
+  .reset-warn {
+    color: #e0a0a0;
+    font-size: 24px;
+    line-height: 34px;
+    margin-bottom: 14px;
+  }
+
+  .reset-confirm {
+    margin-top: 10px;
+    justify-content: center;
+    align-items: center;
+    background-color: #1a1010;
+    border-width: 1px;
+    border-color: #3a1a1a;
+    border-radius: 8px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .reset-ready {
+    background-color: #3a0e0e;
+    border-color: #8b0000;
+    opacity: 1;
+  }
+
+  .reset-confirm-text {
+    color: #999999;
+    font-size: 26px;
+  }
+
+  .reset-confirm-on {
+    color: #ff7a7a;
+  }
+</style>

@@ -1,0 +1,92 @@
+<template>
+  <div class="page column">
+    <text class="back" @click="back">返回</text>
+
+    <text class="title">1. 支持的选择器（不支持后代选择器）</text>
+    <div class="column group">
+      <text style="color: #FF0000;">内联样式</text>
+      <text id="id">ID选择器</text>
+      <text class="cls">class选择器</text>
+      <text>tag选择器</text>
+    </div>
+
+    <text class="title">2. 动态修改样式</text>
+    <div class="column group">
+      <!-- 修改 class -->
+      <text class="normal-text {{ className }}" onclick="changeClassName">点击我修改文字颜色</text>
+      <!-- 修改内联 style -->
+      <text style="color: {{ textColor }}" onclick="changeInlineStyle">点击我修改文字颜色</text>
+      <!-- 修改绑定的对象 (1030+) -->
+      <text style="{{ styleObj }}" onclick="changeStyleObj">点击我修改文字颜色</text>
+      <!-- 修改绑定的样式字符串 (1030+) -->
+      <text style="{{ styleText }}" onclick="changeStyleText">点击我修改文字颜色</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+      className: 'text-blue',
+      textColor: '#0faeff',
+      styleObj: {
+        color: 'red'
+      },
+      styleText: 'color: red'
+    },
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    },
+    changeClassName () {
+      this.className = 'text-red'
+    },
+    changeInlineStyle () {
+      this.textColor = '#f76160'
+    },
+    changeStyleObj () {
+      this.styleObj = {
+        color: 'yellow'
+      }
+    },
+    changeStyleText () {
+      this.styleText = 'color: green'
+    }
+  }
+</script>
+
+<style>
+  @import '../../../common/comm.css';
+
+  /* tag选择器 */
+  text {
+    color: #0000FF;
+  }
+  /* class选择器（推荐） */
+  .cls {
+    color: #00FF00;
+  }
+  /* ID选择器 */
+  #id {
+    color: #00A000;
+  }
+  /* 并列选择 */
+  .cls, #id {
+    /* font-weight: bold; */
+  }
+
+  .normal-text {
+    /* font-weight: bold; */
+  }
+  .text-blue {
+    color: #0faeff;
+  }
+  .text-red {
+    color: #f76160;
+  }
+</style>

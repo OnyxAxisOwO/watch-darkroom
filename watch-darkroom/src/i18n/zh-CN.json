@@ -1,0 +1,31 @@
+{
+  "message": {
+    "i18nTest": {
+      "text": "普通文本",
+      "format": {
+        "object": "替换名称：{name}",
+        "array": "替换元素：{0}"
+      },
+      "array": [
+        "文本",
+        {
+          "key": "文本1"
+        },
+        [
+          "文本2"
+        ]
+      ],
+      "plurals": {
+        "double": "car | cars",
+        "three": "no apples|one apple|{count} apples",
+        "format": {
+          "object": "type-{name}",
+          "array": "type-{0}"
+        }
+      }
+    },
+    "home": {
+      "text": "home text content"
+    }
+  }
+}

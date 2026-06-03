@@ -1,0 +1,157 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title s-danger">开发者设置</text>
+
+      <div class="warn-box">
+        <text class="warn-text">注意：本页仅用于开发与测试，会直接改写存档、跳过正常流程，可能导致存档异常。普通玩家请勿使用。</text>
+      </div>
+
+      <text class="s-desc">{{status}}</text>
+
+      <div class="s-row" @click="readyBuilder">
+        <text class="s-row-label">点燃并就绪建造者</text>
+        <text class="s-row-sub">›</text>
+      </div>
+      <div class="s-row" @click="giveResources">
+        <text class="s-row-label">资源大礼包</text>
+        <text class="s-row-sub">›</text>
+      </div>
+      <div class="s-row" @click="unlockBuildings">
+        <text class="s-row-label">解锁全部建筑 + 人口</text>
+        <text class="s-row-sub">›</text>
+      </div>
+      <div class="s-row" @click="addPop">
+        <text class="s-row-label">人口 +10</text>
+        <text class="s-row-sub">›</text>
+      </div>
+      <div class="s-row" @click="triggerEvent">
+        <text class="s-row-label">触发随机事件</text>
+        <text class="s-row-sub">›</text>
+      </div>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+
+  var SAVE_KEY = 'darkroom_save_v1'
+
+  function emptySave() {
+    return {
+      game: {
+        fire: 0, temperature: 0, builder: -1, fireLit: false, builderTimer: 0,
+        buildings: {}, population: 0, workers: {}, perks: {}
+      },
+      stores: {}, seenForest: false, tab: 'room'
+    }
+  }
+
+  export default {
+    private: {
+      status: '点击任意项立即生效，返回游戏后可见。'
+    },
+    // 读取存档 -> 修改 -> 写回 -> 打脏标记
+    patch(fn, tip) {
+      var self = this
+      storage.get({
+        key: SAVE_KEY,
+        success: function (val) {
+          var data = emptySave()
+          if (val) { try { data = JSON.parse(val) } catch (e) { } }
+          if (!data.game) data.game = emptySave().game
+          if (!data.game.buildings) data.game.buildings = {}
+          if (!data.game.workers) data.game.workers = {}
+          if (!data.stores) data.stores = {}
+          fn(data)
+          storage.set({
+            key: SAVE_KEY, value: JSON.stringify(data),
+            complete: function () {
+              storage.set({ key: 'darkroom_dirty', value: '1' })
+              self.status = tip
+            }
+          })
+        }
+      })
+    },
+
+    readyBuilder() {
+      this.patch(function (d) {
+        d.game.fire = 4
+        d.game.temperature = 4
+        d.game.fireLit = true
+        d.game.builder = 4
+        d.seenForest = true
+        if (typeof d.stores.wood === 'undefined') d.stores.wood = 0
+      }, '已点燃火焰并让建造者就绪。')
+    },
+    giveResources() {
+      this.patch(function (d) {
+        var add = {
+          wood: 2000, fur: 500, meat: 300, scales: 100, teeth: 100,
+          cloth: 100, leather: 200, bait: 50, 'cured meat': 50,
+          iron: 200, coal: 200, sulphur: 100, steel: 100, medicine: 10
+        }
+        for (var k in add) d.stores[k] = (d.stores[k] || 0) + add[k]
+        d.seenForest = true
+      }, '已发放资源大礼包。')
+    },
+    unlockBuildings() {
+      this.patch(function (d) {
+        d.game.builder = 4
+        d.game.fireLit = true
+        if (d.game.fire < 3) d.game.fire = 3
+        d.seenForest = true
+        var b = d.game.buildings
+        b.trap = Math.max(b.trap || 0, 5)
+        b.cart = 1
+        b.hut = Math.max(b.hut || 0, 5)
+        b.lodge = 1
+        b['trading post'] = 1
+        b.tannery = 1
+        b.smokehouse = 1
+        b.workshop = 1
+        if ((d.game.population || 0) < 20) d.game.population = 20
+        if (typeof d.stores.wood === 'undefined') d.stores.wood = 0
+      }, '已解锁全部建筑，人口补到 20。')
+    },
+    addPop() {
+      this.patch(function (d) {
+        d.game.population = (d.game.population || 0) + 10
+      }, '人口 +10。')
+    },
+    triggerEvent() {
+      var self = this
+      storage.set({
+        key: 'darkroom_devEvent', value: '1',
+        complete: function () { self.status = '已请求触发事件，返回游戏后弹出（需满足条件）。' }
+      })
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../settings.css';
+
+  .warn-box {
+    background-color: #2a1010;
+    border-width: 1px;
+    border-color: #5a1a1a;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .warn-text {
+    color: #e08080;
+    font-size: 22px;
+    line-height: 32px;
+  }
+</style>

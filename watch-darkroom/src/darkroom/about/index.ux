@@ -1,0 +1,96 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title">关于</text>
+
+      <text class="about-game">手表版小黑屋</text>
+      <text class="about-sub">移植自 A Dark Room（MIT）</text>
+
+      <div class="qr-wrap">
+        <image class="qr" src="/common/qr.png"></image>
+      </div>
+      <text class="about-link">扫码访问 GitHub 仓库</text>
+      <text class="about-url">github.com/OnyxAxisOwO/watch-darkroom</text>
+
+      <div class="about-divider"></div>
+
+      <text class="about-row">作者：OnyxAxis</text>
+      <text class="about-url">onyxaxis.org</text>
+
+      <text class="about-row">交流 QQ 群</text>
+      <text class="about-url">628544171</text>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../settings.css';
+
+  .about-game {
+    color: #ffffff;
+    font-size: 30px;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .about-sub {
+    color: #888888;
+    font-size: 22px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .qr-wrap {
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .qr {
+    width: 220px;
+    height: 220px;
+    background-color: #ffffff;
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .about-link {
+    color: #ffffff;
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .about-url {
+    color: #39d98a;
+    font-size: 22px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .about-divider {
+    height: 1px;
+    background-color: #222222;
+    margin-top: 16px;
+    margin-bottom: 16px;
+  }
+
+  .about-row {
+    color: #ffffff;
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+</style>

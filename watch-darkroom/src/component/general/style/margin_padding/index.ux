@@ -1,0 +1,174 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1. margin</text>
+    <div class="column group">
+      <text>不设置margin</text>
+      <div class="box1"></div>
+
+      <text>margin: 0</text>
+      <div class="box1" style="margin: 0"></div>
+
+      <text>margin: 20px</text>
+      <div class="box1" style="margin: 20px"></div>
+
+      <text>margin: 10px 20px 30px 40px</text>
+      <div style="border: 1px solid purple; width: 260px;">
+        <div class="box1" style="margin: 10px 20px 30px 40px"></div>
+      </div>
+    </div>
+
+    <text class="header">2. margin-left|top|right|bottom</text>
+    <div class="column group">
+      <text>margin-top: 20px</text>
+      <div class="box1" style="margin-top: 20px"></div>
+
+      <text>margin-bottom: 20px</text>
+      <div class="box1" style="margin-bottom: 20px"></div>
+      <div style="background-color: #090; width: 200px; height: 5px;"></div>
+
+      <text>margin-left: 20px</text>
+      <div class="box1" style="margin-left: 20px"></div>
+
+      <text>margin-right: 20px</text>
+      <div>
+        <div class="box1" style="margin-right: 20px"></div>
+        <div style="background-color: #090; width: 5px; height: 80px;"></div>
+      </div>
+    </div>
+
+    <text class="header">3. margin负值</text>
+    <div class="column group">
+      <text>margin: 0px</text>
+      <div style="border: 1px solid #090; padding: 0; width: 202px;">
+        <div class="box1" style="margin: 0px;"></div>
+      </div>
+
+      
+      <text class="bug">margin: -10px</text>
+      <div style="border: 1px solid #090; padding: 0; width: 202px;">
+        <div class="box1" style="margin: -10px;"></div>
+      </div>
+
+
+      <text class="">margin: 0px</text>
+      <div style="background-color: #090; width: 210px; height: 5px; margin-top: 5px; margin-left: 5px;"></div>
+      <div>
+        <div style="background-color: #090; width: 5px; height: 80px; margin-left: 5px;"></div>
+        <div class="box1" style="margin: 0px;"></div>
+        <div style="background-color: #090; width: 5px; height: 80px;"></div>
+      </div>
+      <div style="background-color: #090; width: 210px; height: 5px; margin-left: 5px"></div>
+      
+
+      <text class="bug">margin: -10px</text>
+      <div style="background-color: #090; width: 210px; height: 5px; margin-top: 5px; margin-left: 5px;"></div>
+      <div>
+        <div style="background-color: #090; width: 5px; height: 80px; margin-left: 5px;"></div>
+        <div class="box1" style="margin: -10px;"></div>
+        <div style="background-color: #090; width: 5px; height: 80px;"></div>
+      </div>
+      <div style="background-color: #090; width: 210px; height: 5px; margin-left: 5px"></div>
+
+
+
+      <text>margin-top: -20px</text>
+      <div style="flex-direction: column; align-items: center; width: 220px; height: 100px;">
+        <div style="background-color: #090; width: 220px; height: 5px; margin-top: 20px;"></div>
+        <!-- 测试的div，其它的绿色div是方便看定位的 -->
+        <div class="box1" style="margin-top: -20px"></div>
+      </div>
+
+      <text>margin-bottom: -20px</text>
+      <div style="flex-direction: column; align-items: center; width: 220px; height: 100px;">
+        <!-- 测试的div，其它的绿色div是方便看定位的 -->
+        <div class="box1" style="margin-bottom: -20px"></div>
+        <div style="background-color: #090; width: 220px; height: 5px;"></div>
+      </div>
+
+      <text>margin-left: -20px</text>
+      <div style="align-items: center; width: 220px; height: 100px;">
+        <div style="background-color: #090; width: 5px; height: 100px; margin-left: 20px;"></div>
+        <!-- 测试的div，其它的绿色div是方便看定位的 -->
+        <div class="box1" style="margin-left: -20px"></div>
+      </div>
+
+      <text>margin-right: -20px</text>
+      <div style="align-items: center; width: 220px; height: 100px;">
+        <!-- 测试的div，其它的绿色div是方便看定位的 -->
+        <div class="box1" style="margin-right: -20px"></div>
+        <div style="background-color: #090; width: 5px; height: 100px;"></div>
+      </div>
+    </div>
+
+
+    <text class="header">4. padding</text>
+    <div class="column group">
+      <text>padding: 0</text>
+      <div class="box1" style="padding: 0">
+        <div style="background-color: #090; width: 100%; height: 100%"></div>
+      </div>
+
+      <text>padding: 10px</text>
+      <div class="box1" style="padding: 10px">
+        <div style="background-color: #090; width: 100%; height: 100%"></div>
+      </div>
+
+      <text>padding: -10px</text>
+      <div class="box1" style="padding: -10px">
+        <div style="background-color: #090; width: 100%; height: 100%"></div>
+      </div>
+    </div>
+
+    <text class="header">5. padding-left|top|right|bottom</text>
+    <div class="column group">
+      <text>padding-left: 10px</text>
+      <div class="box1" style="padding-left: 10px">
+        <div style="background-color: #090; width: 100%; height: 100%"></div>
+      </div>
+
+      <text>padding-right: 10px</text>
+      <div class="box1" style="padding-right: 10px">
+        <div style="background-color: #090; width: 100%; height: 100%"></div>
+      </div>
+
+      <text>padding-top: 10px</text>
+      <div class="box1" style="padding-top: 10px">
+        <div style="background-color: #090; width: 100%; height: 100%"></div>
+      </div>
+
+      <text>padding-bottom: 10px</text>
+      <div class="box1" style="padding-bottom: 10px">
+        <div style="background-color: #090; width: 100%; height: 100%"></div>
+      </div>
+    </div>
+
+    <text class="header">6. 根元素padding-bottom问题</text>
+    <text class="tips">这个页面目前设置了padding: 30px</text>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../../style/comm.css';
+
+  .box1 {
+    width: 200px;
+    height: 80px;
+    background-color: purple;
+    opacity: 0.7;
+  }
+</style>

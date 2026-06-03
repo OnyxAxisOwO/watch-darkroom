@@ -1,0 +1,49 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title">{{title}}</text>
+      <text class="g-body">{{body}}</text>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import { GUIDE } from '../../guide.js'
+
+  export default {
+    protected: {
+      id: ''
+    },
+    private: {
+      title: '',
+      body: ''
+    },
+    onReady() {
+      for (var i = 0; i < GUIDE.length; i++) {
+        if (GUIDE[i].id === this.id) {
+          this.title = GUIDE[i].title
+          this.body = GUIDE[i].body
+          return
+        }
+      }
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../../settings.css';
+
+  .g-body {
+    color: #dddddd;
+    font-size: 24px;
+    line-height: 36px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+  }
+</style>

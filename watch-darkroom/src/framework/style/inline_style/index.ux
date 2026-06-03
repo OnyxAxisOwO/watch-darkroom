@@ -1,0 +1,29 @@
+<template>
+  <div class="page column">
+    <text class="back" @click="back">返回</text>
+
+    <text class="header">1. 内联样式</text>
+    <div class="column group">
+      <text class="label">style="width:200px; height:80px; background-color:purple"</text>
+      <div class="box" style="width:200px; height:80px; background-color:purple"></div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../style/comm.css';
+</style>

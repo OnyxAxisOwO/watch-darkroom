@@ -1,0 +1,54 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title">游戏攻略</text>
+
+      <div class="warn-box">
+        <text class="warn-text">提示：查看攻略可能会破坏探索的乐趣与游戏体验。是否阅读由你决定。</text>
+      </div>
+
+      <div class="s-row" for="{{item in list}}" @click="open(item.id)">
+        <text class="s-row-label">{{item.title}}</text>
+        <text class="s-row-sub">›</text>
+      </div>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import { GUIDE } from '../guide.js'
+
+  export default {
+    private: {
+      list: GUIDE
+    },
+    open(id) {
+      router.push({ uri: 'darkroom/guide/detail', params: { id: id } })
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../settings.css';
+
+  .warn-box {
+    background-color: #1a1a1a;
+    border-width: 1px;
+    border-color: #333333;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .warn-text {
+    color: #cccccc;
+    font-size: 22px;
+    line-height: 32px;
+  }
+</style>

@@ -1,0 +1,44 @@
+<template>
+  <div class="page home-page">
+    <text class="back" @click="back">返回</text>
+    <text class="link mg-top" @click="jump('other/component-perf/div')">div</text>
+    <text class="link mg-top" @click="jump('other/component-perf/list')">list</text>
+    <text class="link mg-top" @click="jump('other/component-perf/stack')">stack</text>
+    <text class="link mg-top" @click="jump('other/component-perf/swiper')">swiper</text>
+    <text class="link mg-top" @click="jump('other/component-perf/text')">text</text>
+    <text class="link mg-top" @click="jump('other/component-perf/span')">span</text>
+    <text class="link mg-top" @click="jump('other/component-perf/image')">image</text>
+    <text class="link mg-top" @click="jump('other/component-perf/progress')">progress</text>
+    <text class="link mg-top" @click="jump('other/component-perf/marquee')">marquee</text>
+    <text class="link mg-top" @click="jump('other/component-perf/chart')">chart</text>
+    <text class="link mg-top" @click="jump('other/component-perf/qrcode')">qrcode</text>
+    <text class="link mg-top" @click="jump('other/component-perf/input')">input</text>
+    <text class="link mg-top" @click="jump('other/component-perf/picker')">picker</text>
+    <text class="link mg-top" @click="jump('other/component-perf/switch')">switch</text>
+    <text class="link mg-top" @click="jump('other/component-perf/slider')">slider</text>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    private: {
+    },
+
+    back() {
+      router.back();
+    },
+    jump(uri) {
+      router.push({uri});
+    }
+  }
+</script>
+
+<style>
+  @import "../../style/comm.css";
+  .mg-top{
+    font-size: 30px;
+    margin-top: 15px;
+  }
+</style>

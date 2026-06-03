@@ -1,0 +1,104 @@
+<template>
+  <div class="column page">
+    <text class="back" @click="back">返回</text>
+    <text class="header">1. width/height + px</text>
+    <div class="column group">
+      <text>200*80</text>
+      <div style="background-color:#009900; width: 200px; height: 80px">
+      </div>
+    </div>
+
+    <text class="header">2. width/height + 百分比</text>
+    <div class="column group">
+      <text>20%/80%</text>
+      <div class="center" style="background-color:#009900; width: 200px; height: 80px;">
+        <div style="height: 100%; width: 20%; background-color: aquamarine;"></div>
+        <div style="height: 100%; width: 80%; background-color: blanchedalmond;"></div>
+      </div>
+      <text>50%/50%</text>
+      <div class="center" style="background-color:#009900; width: 200px; height: 80px;">
+        <div style="height: 100%; width: 50%; background-color: aquamarine;"></div>
+        <div style="height: 100%; width: 50%; background-color: blanchedalmond;"></div>
+      </div>
+      <text>20%/30%/50%</text>
+      <div class="center" style="background-color:#009900; width: 200px; height: 80px;">
+        <div style="height: 100%; width: 20%; background-color: aquamarine;"></div>
+        <div style="height: 100%; width: 30%; background-color: blanchedalmond;"></div>
+        <div style="height: 100%; width: 50%; background-color: cadetblue;"></div>
+      </div>
+    </div>
+
+    <text class="header">3. width/height + border</text>
+    <div class="column group">
+      <text>200*80 / center / border: none</text>
+      <div class="center" style="background-color:#009900; width: 200px; height: 80px">
+        <text>200*80</text>
+      </div>
+
+      <text>200*80 / center / border:10px solid peru</text>
+      <div class="center" style="background-color:#009900; width: 200px; height: 80px; border: 10px solid peru">
+        <text>200*80</text>
+      </div>
+
+      <text>200*80 / center / border:20px solid peru</text>
+      <div class="center" style="background-color:#009900; width: 200px; height: 80px; border: 20px solid peru">
+        <text>200*80</text>
+      </div>
+    </div>
+
+    <text class="header">4. width/height + padding</text>
+    <div class="column group">
+      <text>200*80 / padding:10px</text>
+      <div style="background-color:#009900; width: 200px; height: 80px; padding: 10px">
+        <div style="width: 100%; height: 100%; background-color: aquamarine;"></div>
+      </div>
+
+      <text>200*80 / padding:20px</text>
+      <div style="background-color:#009900; width: 200px; height: 80px; padding: 20px">
+        <div style="width: 100%; height: 100%; background-color: aquamarine;"></div>
+      </div>
+
+      <text>200*80 / center / padding:10px</text>
+      <div class="center" style="background-color:#009900; width: 200px; height: 80px; padding: 10px">
+        <text>200*80</text>
+      </div>
+
+      <text>200*80 / center / padding:20px</text>
+      <div class="center" style="background-color:#009900; width: 200px; height: 80px; padding: 20px">
+        <text>200*80</text>
+      </div>
+    </div>
+
+    <text class="header">5. max|min-width/max|min-height + px</text>
+    <div class="column group">
+      <text class="">min-width: 200px; min-height: 80px</text>
+      <text style="background-color:#009900; min-width: 200px; min-height: 80px">测试文本</text>
+
+      <text>max-width: 200px; max-height: 80px</text>
+      <text style="background-color:#009900; max-width: 200px; max-height: 80px; font-size: 50px">测试文本测试文本</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+
+  export default {
+    onReady() {
+
+    },
+
+    back() {
+      router.back();
+    }
+  }
+</script>
+
+<style>
+  @import '../../../../style/comm.css';
+
+  .center {
+    justify-content: center;
+    align-items: center;
+  }
+</style>
