@@ -14,6 +14,9 @@
     },
     {
       "name": "system.storage"
+    },
+    {
+      "name": "system.device"
     }
   ],
   "config": {
@@ -53,6 +56,9 @@
       "darkroom/bench": {
         "component": "index"
       },
+      "darkroom/sysinfo": {
+        "component": "index"
+      },
       "darkroom/about": {
         "component": "index"
       },
@@ -63,6 +69,9 @@
         "component": "index"
       },
       "darkroom/dev/scenes": {
+        "component": "index"
+      },
+      "darkroom/outfit": {
         "component": "index"
       },
       "darkroom/world": {

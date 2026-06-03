@@ -53,9 +53,21 @@
 
     onReady() {
       this.buildGrid()
-      this.reset()
-      this._alive = true
-      this.loop()
+      var self = this
+      this._engine = 0
+      storage.get({
+        key: SAVE_KEY,
+        success: function (val) {
+          var hull = 0, engine = 0
+          if (val) { try { var d = JSON.parse(val); if (d.game && d.game.ship) { hull = d.game.ship.hull || 0; engine = d.game.ship.engine || 0 } } catch (e) { } }
+          self.maxHull = MAX_HULL + hull * 5
+          self._engine = engine
+          self.reset()
+          self._alive = true
+          self.loop()
+        },
+        fail: function () { self.reset(); self._alive = true; self.loop() }
+      })
     },
     onHide() { this._alive = false; if (this._t) { clearTimeout(this._t); this._t = null } },
     onDestroy() { this._alive = false; if (this._t) clearTimeout(this._t) },
@@ -73,7 +85,7 @@
 
     reset() {
       this.shipX = 3
-      this.hull = MAX_HULL
+      this.hull = this.maxHull
       this.altitude = 0
       this.asteroids = []
       this.over = { active: false, kind: '', title: '', text: '' }
@@ -99,7 +111,8 @@
         if (a.y === SHIP_ROW && a.x === this.shipX) { hitThis = true; continue }
         next.push(a)
       }
-      var prob = 0.32 + this.altitude / 260
+      var prob = (0.32 - (this._engine || 0) * 0.03) + this.altitude / 260
+      if (prob < 0.1) prob = 0.1
       if (Math.random() < prob) next.push({ x: rnd(0, W - 1), y: 0 })
       this.asteroids = next
       this.altitude++

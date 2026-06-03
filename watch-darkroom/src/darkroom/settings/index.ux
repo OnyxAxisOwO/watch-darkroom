@@ -33,6 +33,11 @@
         <text class="s-row-sub">›</text>
       </div>
 
+      <div class="s-row" @click="go('darkroom/sysinfo')">
+        <text class="s-row-label">系统信息</text>
+        <text class="s-row-sub">›</text>
+      </div>
+
       <div class="s-row" @click="go('darkroom/about')">
         <text class="s-row-label">关于</text>
         <text class="s-row-sub">›</text>

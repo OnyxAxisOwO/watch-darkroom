@@ -1,0 +1,154 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title">系统信息</text>
+
+      <text class="grp">设备</text>
+      <div class="kv" for="{{r in rows}}">
+        <text class="kv-k">{{r.k}}</text>
+        <text class="kv-v">{{r.v}}</text>
+      </div>
+      <text if="{{rows.length === 0}}" class="s-desc">{{infoNote}}</text>
+
+      <text class="grp">CPU 性能</text>
+      <div class="kv">
+        <text class="kv-k">性能分</text>
+        <text class="kv-v">{{cpuScore}}</text>
+      </div>
+      <div class="s-row" @click="runCpu">
+        <text class="s-row-label">测一下 CPU</text>
+        <text class="s-row-sub">{{cpuState}}</text>
+      </div>
+
+      <text class="grp">实时占用</text>
+      <div class="kv">
+        <text class="kv-k">CPU 占用</text>
+        <text class="kv-v dim">平台未开放</text>
+      </div>
+      <div class="kv">
+        <text class="kv-k">内存占用</text>
+        <text class="kv-v dim">平台未开放</text>
+      </div>
+      <div class="kv">
+        <text class="kv-k">存储占用</text>
+        <text class="kv-v dim">平台未开放</text>
+      </div>
+      <text class="s-desc">Vela 快应用是沙箱环境，不开放进程级 CPU / 内存 / 存储占用接口，因此无法显示实时占用，仅能给出设备信息与 CPU 性能分。</text>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import device from '@system.device'
+
+  var LABELS = {
+    brand: '品牌', manufacturer: '厂商', model: '型号', product: '产品',
+    osType: '系统', osVersionName: '系统版本', osVersionCode: '系统版本号',
+    platformVersionName: '平台版本', platformVersionCode: '平台版本号',
+    language: '语言', region: '地区', deviceType: '设备类型',
+    screenWidth: '屏幕宽', screenHeight: '屏幕高', windowWidth: '窗口宽', windowHeight: '窗口高',
+    screenDensity: '像素密度', statusBarHeight: '状态栏高', cutout: '挖孔',
+    vendorOsName: '系统名', vendorOsVersion: '系统版本'
+  }
+  var CPU_TARGET = 120000
+  var CPU_CHUNK = 6000
+
+  export default {
+    private: {
+      rows: [],
+      infoNote: '正在读取设备信息…',
+      cpuScore: '未测试',
+      cpuState: '点击测试'
+    },
+    onShow() {
+      var self = this
+      try {
+        device.getInfo({
+          success: function (data) { self.fill(data) },
+          fail: function () { self.infoNote = '设备信息读取失败.' }
+        })
+      } catch (e) { this.infoNote = '当前环境不支持设备信息接口.' }
+    },
+    fill(data) {
+      var rows = []
+      for (var k in data) {
+        var v = data[k]
+        if (v === null || typeof v === 'undefined' || v === '') continue
+        if (typeof v === 'object') { try { v = JSON.stringify(v) } catch (e) { continue } }
+        rows.push({ k: LABELS[k] || k, v: '' + v })
+      }
+      if (rows.length === 0) this.infoNote = '设备未返回信息.'
+      this.rows = rows
+    },
+    runCpu() {
+      if (this._busy) return
+      this._busy = true
+      this._iters = 0
+      this._compute = 0
+      this._x = 0
+      this.cpuState = '0%'
+      this.cpuTick()
+    },
+    cpuTick() {
+      var self = this
+      setTimeout(function () {
+        var t0 = Date.now()
+        var x = self._x
+        var base = self._iters
+        for (var i = 0; i < CPU_CHUNK; i++) { x += Math.sqrt((base + i) * 1.000001); x = x % 100000 }
+        var dt = Date.now() - t0
+        self._x = x
+        self._iters += CPU_CHUNK
+        self._compute += dt
+        var pct = Math.round(self._iters / CPU_TARGET * 100)
+        if (pct > 100) pct = 100
+        self.cpuState = pct + '%'
+        if (self._iters >= CPU_TARGET) {
+          var ms = self._compute <= 0 ? 1 : self._compute
+          self.cpuScore = Math.round(self._iters / ms) + ' 分'
+          self.cpuState = '重新测试'
+          self._busy = false
+        } else self.cpuTick()
+      }, 0)
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../settings.css';
+
+  .grp {
+    color: #c8a000;
+    font-size: 22px;
+    margin-top: 16px;
+    margin-bottom: 6px;
+  }
+
+  .kv {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .kv-k {
+    color: #aaaaaa;
+    font-size: 22px;
+  }
+
+  .kv-v {
+    color: #ffffff;
+    font-size: 22px;
+  }
+
+  .dim {
+    color: #777777;
+  }
+</style>

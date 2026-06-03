@@ -129,11 +129,14 @@
     teeth: '牙齿', cloth: '布料', charm: '符咒',
     leather: '皮革', 'cured meat': '熏肉', bait: '诱饵', compass: '罗盘',
     iron: '铁', coal: '煤', sulphur: '硫磺', steel: '钢', bullets: '子弹', medicine: '药剂',
-    torch: '火把', waterskin: '水袋', 'bone spear': '骨枪', rucksack: '背包'
+    'alien alloy': '外星合金', 'energy cell': '能量电池', grenade: '手雷', bolas: '流星索',
+    torch: '火把', waterskin: '水袋', 'bone spear': '骨枪', rucksack: '背包',
+    'laser rifle': '激光枪', 'plasma rifle': '等离子枪', 'energy blade': '能量刃', 'energy shield': '能量护盾'
   }
   var STORE_ORDER = ['wood', 'fur', 'meat', 'scales', 'teeth', 'cloth', 'charm',
     'leather', 'cured meat', 'bait', 'compass',
-    'iron', 'coal', 'sulphur', 'steel', 'bullets', 'medicine']
+    'iron', 'coal', 'sulphur', 'steel', 'bullets', 'medicine',
+    'alien alloy', 'energy cell', 'grenade', 'bolas']
 
   var TRAP_DROPS = [
     [0.5, 'fur', '几块毛皮'],
@@ -169,12 +172,22 @@
     's armour': { name: '钢甲', type: 'upgrade', max: 1, cost: function () { return { leather: 200, steel: 100 } } },
     'iron sword': { name: '铁剑', type: 'weapon', max: 0, cost: function () { return { wood: 200, leather: 50, iron: 20 } } },
     'steel sword': { name: '钢剑', type: 'weapon', max: 0, cost: function () { return { wood: 500, leather: 100, steel: 20 } } },
-    rifle: { name: '步枪', type: 'weapon', max: 0, cost: function () { return { wood: 200, steel: 50, sulphur: 50 } } }
+    rifle: { name: '步枪', type: 'weapon', max: 0, cost: function () { return { wood: 200, steel: 50, sulphur: 50 } } },
+    // 外星制造机（荒野获得，不可建造）及其高级配方
+    fabricator: { name: '外星制造机', type: 'found', max: 1, cost: function () { return {} } },
+    'energy cell': { name: '能量电池', type: 'ammo', batch: 5, max: 0, cost: function () { return { steel: 10, 'alien alloy': 1 } } },
+    grenade: { name: '手雷', type: 'ammo', batch: 3, max: 0, cost: function () { return { steel: 5, sulphur: 5 } } },
+    bolas: { name: '流星索', type: 'ammo', batch: 3, max: 0, cost: function () { return { teeth: 5, fur: 5 } } },
+    'laser rifle': { name: '激光枪', type: 'fab', max: 0, cost: function () { return { steel: 50, 'alien alloy': 10 } } },
+    'plasma rifle': { name: '等离子枪', type: 'fab', max: 0, cost: function () { return { steel: 100, 'alien alloy': 25 } } },
+    'energy blade': { name: '能量刃', type: 'fab', max: 0, cost: function () { return { 'alien alloy': 25 } } },
+    'energy shield': { name: '能量护盾', type: 'fab', max: 1, cost: function () { return { 'alien alloy': 15 } } }
   }
   var BUILD_ORDER = ['trap', 'cart', 'hut', 'lodge', 'trading post', 'tannery', 'smokehouse', 'workshop',
-    'steelworks', 'armoury',
+    'steelworks', 'armoury', 'fabricator',
     'torch', 'waterskin', 'cask', 'water tank', 'bone spear', 'rucksack', 'wagon', 'convoy',
-    'l armour', 'i armour', 's armour', 'iron sword', 'steel sword', 'rifle']
+    'l armour', 'i armour', 's armour', 'iron sword', 'steel sword', 'rifle',
+    'energy cell', 'grenade', 'bolas', 'laser rifle', 'plasma rifle', 'energy blade', 'energy shield']
 
   // 工人收入（每 10 秒，单位：每名工人）
   var WORKERS = [
@@ -327,6 +340,8 @@
       if (typeof g.workers === 'undefined') g.workers = {}
       if (typeof g.population === 'undefined') g.population = 0
       if (typeof g.perks === 'undefined') g.perks = {}
+      if (typeof g.ship === 'undefined') g.ship = { hull: 0, engine: 0 }
+      if (typeof g.prestige === 'undefined') g.prestige = 0
     },
 
     resetState() {
@@ -491,7 +506,9 @@
 
     embark() {
       this.save()
-      router.push({ uri: 'darkroom/world' })
+      // 已有进行中的探索则直接继续；否则先进出征补给界面
+      if (this.game.world && this.game.world.map) router.push({ uri: 'darkroom/world' })
+      else router.push({ uri: 'darkroom/outfit' })
     },
 
     lightFire() {
@@ -564,14 +581,19 @@
     build(id) {
       var c = CRAFTABLES[id]
       if (!c) return
-      var have = this.game.buildings[id] || 0
+      // 消耗类（弹药/手雷/流星索）按库存计数，其余按建筑/装备计数
+      var isAmmo = (c.type === 'ammo')
+      var have = isAmmo ? (this.stores[id] || 0) : (this.game.buildings[id] || 0)
       if (c.max > 0 && have >= c.max) { this.log('不需要更多了.'); return }
       var cost = c.cost(have)
       if (!this.canAfford(cost)) { this.log('资源不够.'); return }
       for (var k in cost) this.addStore(k, -cost[k])
-      this.game.buildings[id] = have + 1
-      if (c.type === 'building') this.log('建造好了一个' + c.name + '.')
-      else this.log('你做好了一个' + c.name + '.')
+      if (isAmmo) { this.addStore(id, c.batch || 1); this.log('制造了 ' + (c.batch || 1) + ' 个' + c.name + '.') }
+      else {
+        this.game.buildings[id] = (this.game.buildings[id] || 0) + 1
+        if (c.type === 'building') this.log('建造好了一个' + c.name + '.')
+        else this.log('你做好了一个' + c.name + '.')
+      }
       this.render()
     },
 
@@ -899,8 +921,14 @@
       var g = this.game
       if (g.builder < 4) return false
       var c = CRAFTABLES[id]
-      if (c.type !== 'building' && !(g.buildings.workshop > 0)) return false
-      var cost = c.cost(g.buildings[id] || 0)
+      if (c.type === 'found') return false            // 外星制造机：荒野获得，不可建造
+      if (c.type === 'fab' || c.type === 'ammo') {     // 制造机配方需有外星制造机
+        if (!(g.buildings.fabricator > 0)) return false
+      } else if (c.type !== 'building') {              // 工坊配方需有工坊
+        if (!(g.buildings.workshop > 0)) return false
+      }
+      var have = (c.type === 'ammo') ? (this.stores[id] || 0) : (g.buildings[id] || 0)
+      var cost = c.cost(have)
       for (var res in cost) {
         if (res === 'wood') continue
         if (!this.has(res)) return false
@@ -929,7 +957,7 @@
             var id = BUILD_ORDER[i]
             if (!this.craftUnlocked(id)) continue
             var c = CRAFTABLES[id]
-            var have = g.buildings[id] || 0
+            var have = (c.type === 'ammo') ? (this.stores[id] || 0) : (g.buildings[id] || 0)
             if (c.max > 0 && have >= c.max) continue
             var cost = c.cost(have)
             var verb = (c.type === 'building') ? '建造 ' : '制造 '

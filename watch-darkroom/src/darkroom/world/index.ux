@@ -91,7 +91,10 @@
     { id: 'steel sword', name: '钢剑', verb: '劈斩', dmg: 6, cd: 2, ranged: false },
     { id: 'rifle', name: '步枪', verb: '射击', dmg: 5, cd: 1, ranged: true, ammo: 'bullets' },
     { id: 'bolas', name: '流星索', verb: '缠住', dmg: 0, cd: 3, ranged: true, ammo: 'bolas', stun: true },
-    { id: 'grenade', name: '手雷', verb: '投掷', dmg: 15, cd: 4, ranged: true, ammo: 'grenade' }
+    { id: 'grenade', name: '手雷', verb: '投掷', dmg: 15, cd: 4, ranged: true, ammo: 'grenade' },
+    { id: 'energy blade', name: '能量刃', verb: '挥斩', dmg: 10, cd: 2, ranged: false },
+    { id: 'laser rifle', name: '激光枪', verb: '激射', dmg: 8, cd: 1, ranged: true, ammo: 'energy cell' },
+    { id: 'plasma rifle', name: '等离子枪', verb: '轰击', dmg: 12, cd: 1, ranged: true, ammo: 'energy cell' }
   ]
 
   var TERRAIN = [';', ',', '.']
@@ -126,6 +129,9 @@
   function dist(x, y) { return Math.abs(x - RADIUS) + Math.abs(y - RADIUS) }
 
   export default {
+    protected: {
+      supply: ''
+    },
     private: {
       theme: THEMES[0],
       grid: [],
@@ -273,9 +279,22 @@
       if (b['l armour']) mh += 5
       if (b['i armour']) mh += 10
       if (b['s armour']) mh += 15
+      if (b['energy shield']) mh += 20
       this.maxHealth = mh
-      // 进入时补满
-      if (this.world.health === undefined) { this.world.health = mh; this.world.water = mw; this.world.food = Math.min(this.stores['cured meat'] || 0, 10) }
+      // 进入时补满（仅首次进入该荒野）
+      if (this.world.health === undefined) {
+        this.world.health = mh
+        this.world.water = mw
+        var sup = this.supply
+        if (sup !== undefined && sup !== '' && !isNaN(Number(sup))) {
+          var f = Math.max(0, Math.floor(Number(sup)))
+          this.world.food = f
+          // 出征携带的熏肉从仓库扣除
+          this.stores['cured meat'] = Math.max(0, (this.stores['cured meat'] || 0) - f)
+        } else {
+          this.world.food = Math.min(this.stores['cured meat'] || 0, 10)
+        }
+      }
       this.health = this.world.health
       this.water = this.world.water
       this.food = this.world.food
@@ -465,6 +484,16 @@
       var t = this.scene.kind
       var x = this.world.x, y = this.world.y
       if (id === 'leave') { this.scene = { active: false }; this.render(); return }
+      if (t === 'W' && (id === 'upHull' || id === 'upEngine')) {
+        if ((this.stores['alien alloy'] || 0) < 5) { this.openShip(); return }
+        if (!this.game.ship) this.game.ship = { hull: 0, engine: 0 }
+        this.addStore('alien alloy', -5)
+        if (id === 'upHull') this.game.ship.hull++
+        else this.game.ship.engine++
+        this.save()
+        this.openShip()   // 刷新弹窗
+        return
+      }
       if (id === 'fix' && t === 'W') {
         this.addStore('steel', -50); this.addStore('iron', -50)
         this.world.map = this.setTile(this.world.map, x, y, '#')
@@ -496,6 +525,7 @@
         this.log('在前哨补满了饮水，还找到一些熏肉.')
       } else if (t === 'B') {
         this.loot(['scales', 'teeth', 'charm', 'sulphur'], 1, 3, 4, 12, '从钻孔深处')
+        if (Math.random() < 0.5) this.addStore('alien alloy', rnd(3, 8))
       } else if (t === 'F') {
         this.hurt(rnd(1, 4), '锈蚀的残骸划伤了你')
         this.loot(['bullets', 'steel', 'iron', 'leather'], 2, 3, 4, 14, '在战场上')
@@ -509,6 +539,11 @@
         this.hurt(rnd(4, 9), '战舰守卫给你留下了伤口')
         if (this.health <= 0) { this.scene = { active: false }; this.die(); return }
         this.loot(['steel', 'bullets', 'sulphur', 'iron'], 3, 5, 6, 18, '从战舰残骸')
+        this.addStore('alien alloy', rnd(10, 25))
+        if (!(this.game.buildings.fabricator > 0)) {
+          this.game.buildings.fabricator = 1
+          this.log('你拆下了一台完好的外星制造机！现在能造高级装备了.')
+        }
       }
       if (visited && !this._devTest) this.world.map = this.setTile(this.world.map, x, y, '#')
       this._devTest = false
@@ -533,12 +568,18 @@
     },
 
     openShip() {
+      var ship = this.game.ship || { hull: 0, engine: 0 }
+      var alloy = this.stores['alien alloy'] || 0
       var canFix = (this.stores.steel || 0) >= 50 && (this.stores.iron || 0) >= 50
+      var btns = []
+      if (ship.hull < 5) btns.push({ id: 'upHull', label: '升级船体 Lv' + ship.hull + '→' + (ship.hull + 1) + '（合金5）', disabled: alloy < 5 })
+      if (ship.engine < 5) btns.push({ id: 'upEngine', label: '升级引擎 Lv' + ship.engine + '→' + (ship.engine + 1) + '（合金5）', disabled: alloy < 5 })
+      btns.push({ id: 'fix', label: canFix ? '重启核心并起飞' : '起飞需钢50铁50', disabled: !canFix })
+      btns.push({ id: 'leave', label: '暂时离开', disabled: false })
       this.scene = {
         active: true, kind: 'W', title: '坠毁的星舰',
-        text: '一艘古老的星舰半埋在沙土中，核心还有微弱的残响.修复它，也许能离开这片荒原.\n\n需要：钢50 铁50',
-        buttons: canFix ? [{ id: 'fix', label: '重启核心并起飞' }, { id: 'leave', label: '暂时离开' }]
-          : [{ id: 'leave', label: '材料不足，离开' }]
+        text: '一艘古老的星舰半埋在沙土中.修复它便能离开荒原；用外星合金升级船体(增加耐久)与引擎(降低难度).\n\n船体 Lv' + ship.hull + '　引擎 Lv' + ship.engine + '　合金 ' + alloy,
+        buttons: btns
       }
     },
 
@@ -552,7 +593,8 @@
       var m = {
         wood: '木头', fur: '毛皮', meat: '肉', scales: '鳞片', teeth: '牙齿', cloth: '布料',
         leather: '皮革', medicine: '药剂', iron: '铁', coal: '煤', sulphur: '硫磺',
-        charm: '符咒', bullets: '子弹', steel: '钢', 'cured meat': '熏肉'
+        charm: '符咒', bullets: '子弹', steel: '钢', 'cured meat': '熏肉',
+        'alien alloy': '外星合金', 'energy cell': '能量电池'
       }
       return m[k] || k
     },

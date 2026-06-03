@@ -41,6 +41,22 @@
         <text class="s-row-label">测试特殊场景</text>
         <text class="s-row-sub">事件/地标/战斗 ›</text>
       </div>
+      <div class="s-row" @click="testOutfit">
+        <text class="s-row-label">出征补给界面</text>
+        <text class="s-row-sub">›</text>
+      </div>
+      <div class="s-row" @click="unlockFab">
+        <text class="s-row-label">解锁外星制造机 + 合金</text>
+        <text class="s-row-sub">›</text>
+      </div>
+      <div class="s-row" @click="maxShip">
+        <text class="s-row-label">飞船升级满级</text>
+        <text class="s-row-sub">›</text>
+      </div>
+      <div class="s-row" @click="prestige">
+        <text class="s-row-label s-danger">重生（声望）</text>
+        <text class="s-row-sub">{{prestigeState}}</text>
+      </div>
       <div class="s-row" @click="triggerEvent">
         <text class="s-row-label">触发随机事件</text>
         <text class="s-row-sub">›</text>
@@ -76,11 +92,19 @@
   export default {
     private: {
       status: '点击任意项立即生效，返回游戏后可见。',
-      fpsState: '关闭'
+      fpsState: '关闭',
+      prestigeState: ''
     },
     onShow() {
       var self = this
       storage.get({ key: 'darkroom_showfps', success: function (v) { self.fpsState = (v === '1') ? '开启' : '关闭' } })
+      storage.get({
+        key: 'darkroom_save_v1',
+        success: function (val) {
+          if (!val) return
+          try { var d = JSON.parse(val); var p = (d.game && d.game.prestige) || 0; self.prestigeState = p > 0 ? ('当前 ' + p) : '' } catch (e) { }
+        }
+      })
     },
     toggleFps() {
       var self = this
@@ -194,6 +218,38 @@
     },
     testScenes() {
       router.push({ uri: 'darkroom/dev/scenes' })
+    },
+    testOutfit() {
+      router.push({ uri: 'darkroom/outfit' })
+    },
+    unlockFab() {
+      this.patch(function (d) {
+        d.game.builder = 4
+        d.game.buildings.workshop = 1
+        d.game.buildings.fabricator = 1
+        var add = { 'alien alloy': 80, steel: 300, sulphur: 150, iron: 200 }
+        for (var k in add) d.stores[k] = (d.stores[k] || 0) + add[k]
+      }, '已解锁外星制造机并发放外星合金，工坊配方里可造高级装备。')
+    },
+    maxShip() {
+      this.patch(function (d) {
+        d.game.ship = { hull: 5, engine: 5 }
+        d.stores['alien alloy'] = (d.stores['alien alloy'] || 0) + 40
+      }, '飞船船体/引擎已满级，太空小游戏难度降低、耐久提升。')
+    },
+    prestige() {
+      var self = this
+      this.patch(function (d) {
+        var p = (d.game.prestige || 0) + 1
+        d.game = {
+          fire: 0, temperature: 0, builder: -1, fireLit: false, builderTimer: 0,
+          buildings: {}, population: 0, workers: {}, perks: {}, ship: { hull: 0, engine: 0 },
+          prestige: p, world: null
+        }
+        d.stores = { wood: 100 * p, fur: 20 * p }
+        d.seenForest = false
+        d.tab = 'room'
+      }, '已重生：声望提升，带着启动资源重新开始。')
     },
     triggerEvent() {
       var self = this

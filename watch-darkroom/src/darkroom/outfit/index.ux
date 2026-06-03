@@ -1,0 +1,120 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title">出征补给</text>
+      <text class="s-desc">背包容量随升级提升。携带的熏肉是旅途口粮，出发时从仓库扣除。</text>
+
+      <div class="kv"><text class="kv-k">背包容量</text><text class="kv-v">{{cap}} 份</text></div>
+      <div class="kv"><text class="kv-k">饮水上限</text><text class="kv-v">{{water}}</text></div>
+      <div class="kv"><text class="kv-k">体力上限</text><text class="kv-v">{{health}}</text></div>
+
+      <text class="grp">携带熏肉</text>
+      <div class="food-row">
+        <text class="fbtn" @click="dec">-</text>
+        <text class="fcount">{{food}} / {{maxFood}}</text>
+        <text class="fbtn" @click="inc">+</text>
+      </div>
+
+      <text class="grp">装备</text>
+      <text class="eq" for="{{w in gear}}">{{w}}</text>
+      <text if="{{gear.length === 0}}" class="s-desc">尚无武器护甲，建议先造些装备.</text>
+
+      <div class="go-btn" @click="depart">
+        <text class="go-text">出发探索</text>
+      </div>
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+
+  var SAVE_KEY = 'darkroom_save_v1'
+
+  export default {
+    private: {
+      cap: 10, water: 10, health: 10,
+      food: 0, maxFood: 0,
+      gear: []
+    },
+    onShow() {
+      var self = this
+      storage.get({
+        key: SAVE_KEY,
+        success: function (val) {
+          var d = { game: {}, stores: {} }
+          if (val) { try { d = JSON.parse(val) } catch (e) { } }
+          var b = (d.game && d.game.buildings) || {}
+          var stores = d.stores || {}
+          // 背包容量
+          var cap = 10
+          if (b.rucksack) cap += 40
+          if (b.wagon) cap += 100
+          if (b.convoy) cap += 200
+          self.cap = cap
+          // 水 / 体力上限
+          var w = 10
+          if (b.waterskin) w += 10
+          if (b.cask) w += 20
+          if (b['water tank']) w += 50
+          self.water = w
+          var h = 10
+          if (b['l armour']) h += 5
+          if (b['i armour']) h += 10
+          if (b['s armour']) h += 15
+          if (b['energy shield']) h += 20
+          self.health = h
+          // 可带熏肉
+          var meat = Math.floor(stores['cured meat'] || 0)
+          self.maxFood = Math.min(meat, cap)
+          self.food = Math.min(self.maxFood, Math.max(0, self.maxFood))
+          // 装备清单
+          var names = {
+            'bone spear': '骨枪', 'iron sword': '铁剑', 'steel sword': '钢剑', rifle: '步枪',
+            'laser rifle': '激光枪', 'plasma rifle': '等离子枪', 'energy blade': '能量刃',
+            'l armour': '皮甲', 'i armour': '铁甲', 's armour': '钢甲', 'energy shield': '能量护盾'
+          }
+          var gear = []
+          for (var k in names) if (b[k] > 0) gear.push(names[k])
+          var bullets = Math.floor(stores.bullets || 0); if (bullets > 0) gear.push('子弹×' + bullets)
+          var cells = Math.floor(stores['energy cell'] || 0); if (cells > 0) gear.push('能量电池×' + cells)
+          self.gear = gear
+        }
+      })
+    },
+    inc() { if (this.food < this.maxFood) this.food++ },
+    dec() { if (this.food > 0) this.food-- },
+    depart() {
+      router.replace({ uri: 'darkroom/world', params: { supply: String(this.food) } })
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../settings.css';
+
+  .grp { color: #c8a000; font-size: 22px; margin-top: 16px; margin-bottom: 6px; }
+  .kv { flex-direction: row; justify-content: space-between; padding-top: 5px; padding-bottom: 5px; }
+  .kv-k { color: #aaaaaa; font-size: 22px; }
+  .kv-v { color: #ffffff; font-size: 22px; }
+  .eq { color: #cccccc; font-size: 22px; padding-top: 3px; padding-bottom: 3px; }
+
+  .food-row { flex-direction: row; align-items: center; justify-content: center; margin-bottom: 6px; }
+  .fbtn {
+    width: 60px; height: 56px; text-align: center; font-size: 32px;
+    color: #ffffff; background-color: #1a1a1a; border-width: 1px; border-color: #333333; border-radius: 8px; margin: 8px;
+  }
+  .fcount { width: 140px; text-align: center; color: #ffffff; font-size: 26px; }
+
+  .go-btn {
+    margin-top: 14px; justify-content: center; align-items: center;
+    background-color: #15301f; border-width: 1px; border-color: #2e6e2e; border-radius: 8px;
+    padding-top: 14px; padding-bottom: 14px;
+  }
+  .go-text { color: #6fe09a; font-size: 28px; }
+</style>
