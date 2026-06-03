@@ -295,7 +295,10 @@
       storage.get({
         key: 'darkroom_devEvent',
         success: function (v) {
-          if (v === '1') { storage.delete({ key: 'darkroom_devEvent' }); self.triggerEvent() }
+          if (!v) return
+          storage.delete({ key: 'darkroom_devEvent' })
+          if (v === '1') self.triggerEvent()
+          else self.openEvent(v)   // 指定事件（开发者测试）
         }
       })
     },
@@ -622,9 +625,11 @@
       if (g.population > 0) { pool.push('beast'); pool.push('plague') }
       if (this.anyStore()) pool.push('thief')
       if ((g.buildings.trap || 0) > 0) pool.push('ruined_trap')
-      if ((g.buildings.hut || 0) > 0) pool.push('hut_fire')
-      if (g.builder >= 0) pool.push('wanderer')
+      if ((g.buildings.hut || 0) > 0) { pool.push('hut_fire'); pool.push('shady_builder') }
+      if (g.builder >= 0) { pool.push('wanderer'); pool.push('noises_inside') }
       if ((this.stores.medicine || 0) > 0) pool.push('sick_man')
+      if ((g.buildings.armoury || 0) > 0) { pool.push('scout'); pool.push('soldier') }
+      pool.push('master')
       if (pool.length === 0) return
       var kind = pool[rand(0, pool.length - 1)]
       this.openEvent(kind)
@@ -703,6 +708,41 @@
           { id: 'help', label: '给药(药剂1)', disabled: (this.stores.medicine || 0) < 1 },
           { id: 'leave', label: '拒绝', disabled: false }
         ]
+      } else if (kind === 'noises_inside') {
+        e.title = '屋内有声音'
+        e.text = '小屋深处传来轻微的响动，像是有人在翻找东西.'
+        e.buttons = [
+          { id: 'check', label: '过去看看', disabled: false },
+          { id: 'leave', label: '不予理会', disabled: false }
+        ]
+      } else if (kind === 'shady_builder') {
+        e.title = '阴影建造者'
+        e.text = '一个鬼鬼祟祟的家伙自称也是建造者，说能帮你"省"些木料.'
+        e.buttons = [
+          { id: 'accept', label: '接受帮助', disabled: false },
+          { id: 'refuse', label: '拒绝', disabled: false }
+        ]
+      } else if (kind === 'scout') {
+        e.title = '侦察兵'
+        e.text = '一名侦察兵带回了远方的消息，愿意用情报换些补给.'
+        e.buttons = [
+          { id: 'trade', label: '给 100 木头换情报', disabled: (this.stores.wood || 0) < 100 },
+          { id: 'leave', label: '送他离开', disabled: false }
+        ]
+      } else if (kind === 'soldier') {
+        e.title = '士兵袭击'
+        e.text = '一队溃散的士兵盯上了村子的物资.'
+        e.buttons = [
+          { id: 'resist', label: '武装抵抗', disabled: false },
+          { id: 'surrender', label: '缴出部分物资', disabled: false }
+        ]
+      } else if (kind === 'master') {
+        e.title = '流浪大师'
+        e.text = '一位云游的大师在火堆旁停步，愿意传授一身技艺.'
+        e.buttons = [
+          { id: 'learn', label: '虚心求教', disabled: false },
+          { id: 'leave', label: '婉言谢绝', disabled: false }
+        ]
       }
       this.event = e
     },
@@ -759,6 +799,37 @@
       } else if (kind === 'sick_man') {
         if (id === 'help' && (this.stores.medicine || 0) >= 1) { this.addStore('medicine', -1); this.addStore('fur', rand(20, 60)); this.log('旅人康复后，留下厚礼以示感激.') }
         else this.log('你拒绝了，旅人蹒跚着离开了.')
+      } else if (kind === 'noises_inside') {
+        if (id === 'check') {
+          if (Math.random() < 0.6) { this.addStore('wood', rand(5, 20)); this.log('原来是建造者在归置柴火，顺手帮了把手.') }
+          else { this.stealRandom(); this.log('一个黑影夺门而出，顺走了点东西.') }
+        } else this.log('响动渐渐平息了.')
+      } else if (kind === 'shady_builder') {
+        if (id === 'accept') {
+          if (Math.random() < 0.5) { this.addStore('wood', rand(50, 120)); this.log('他果然弄来了一批木料.') }
+          else { this.loseHut(); this.log('第二天，他卷着一间棚屋的材料跑了.') }
+        } else this.log('你赶走了他.')
+      } else if (kind === 'scout') {
+        if (id === 'trade' && (this.stores.wood || 0) >= 100) {
+          this.addStore('wood', -100)
+          this.addStore('fur', rand(30, 80)); this.addStore('teeth', rand(2, 6))
+          this.log('侦察兵透露了远方的猎场，临走前留下些战利品.')
+        } else this.log('侦察兵耸耸肩，离开了.')
+      } else if (kind === 'soldier') {
+        if (id === 'resist') {
+          if ((this.stores.bullets || 0) >= 5 || (this.game.buildings['steel sword'] || 0) > 0) {
+            this.addStore('bullets', -Math.min(5, this.stores.bullets || 0))
+            this.log('村民武装起来，击退了士兵，缴获了一些物资.')
+            this.addStore('steel', rand(5, 15))
+          } else {
+            var lost = Math.min(this.game.population, rand(1, 3)); this.game.population -= lost
+            this.log('缺少像样的武器，硬拼损失了 ' + lost + ' 名村民.')
+          }
+        } else { this.stealRandom(); this.stealRandom(); this.log('你交出了部分物资，士兵们扬长而去.') }
+      } else if (kind === 'master') {
+        if (id === 'learn') {
+          if (!this.grantPerk()) { this.addStore('medicine', rand(1, 3)); this.log('你已尽得其传，大师留下些药剂便离去.') }
+        } else this.log('大师颔首，转身离去.')
       }
       this.event = { active: false, kind: '', title: '', text: '', buttons: [] }
       this.render()
@@ -994,10 +1065,10 @@
   .body {
     flex: 1;
     flex-direction: column;
-    padding-left: 48px;
-    padding-right: 48px;
+    padding-left: 60px;
+    padding-right: 60px;
     padding-top: 16px;
-    padding-bottom: 56px;
+    padding-bottom: 64px;
   }
 
   .clock {

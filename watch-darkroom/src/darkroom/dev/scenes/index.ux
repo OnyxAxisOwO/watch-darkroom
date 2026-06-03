@@ -1,0 +1,90 @@
+<template>
+  <div class="s-root">
+    <scroll class="s-body" scroll-y="true">
+      <text class="s-title s-danger">测试特殊场景</text>
+      <text class="s-desc">{{status}}</text>
+
+      <text class="grp">随机事件（设置后返回游戏触发）</text>
+      <div class="s-row" for="{{e in events}}" @click="setEvent(e.id)">
+        <text class="s-row-label">{{e.name}}</text>
+        <text class="s-row-sub">›</text>
+      </div>
+
+      <text class="grp">地标场景（点击直接进入荒野演示）</text>
+      <div class="s-row" for="{{l in lands}}" @click="goScene(l.id)">
+        <text class="s-row-label">{{l.name}}</text>
+        <text class="s-row-sub">›</text>
+      </div>
+
+      <text class="grp">战斗（直接进入荒野遭遇）</text>
+      <div class="s-row" for="{{f in fights}}" @click="goScene(f.id)">
+        <text class="s-row-label">{{f.name}}</text>
+        <text class="s-row-sub">›</text>
+      </div>
+
+      <div class="s-back" @click="back">
+        <text class="s-back-text">返回</text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+  import router from '@system.router'
+  import storage from '@system.storage'
+
+  export default {
+    private: {
+      status: '事件需返回游戏页才会弹出；地标/战斗会直接进入荒野。',
+      events: [
+        { id: 'nomad', name: '游牧商人' },
+        { id: 'noises', name: '外面有声音' },
+        { id: 'noises_inside', name: '屋内有声音' },
+        { id: 'beggar', name: '乞丐' },
+        { id: 'wanderer', name: '神秘流浪者' },
+        { id: 'master', name: '流浪大师' },
+        { id: 'shady_builder', name: '阴影建造者' },
+        { id: 'thief', name: '小偷' },
+        { id: 'scout', name: '侦察兵' },
+        { id: 'plague', name: '疫病' },
+        { id: 'beast', name: '野兽袭击' },
+        { id: 'soldier', name: '士兵袭击' },
+        { id: 'sick_man', name: '病人' },
+        { id: 'hut_fire', name: '棚屋起火' },
+        { id: 'ruined_trap', name: '被毁的陷阱' }
+      ],
+      lands: [
+        { id: 'I', name: '铁矿' }, { id: 'C', name: '煤矿' }, { id: 'S', name: '硫磺矿' },
+        { id: 'V', name: '潮湿的洞穴' }, { id: 'O', name: '废弃的小镇' }, { id: 'H', name: '破败的老屋' },
+        { id: 'Y', name: '倾颓的废城' }, { id: 'P', name: '补给前哨' }, { id: 'B', name: '幽深的钻孔' },
+        { id: 'F', name: '古老的战场' }, { id: 'M', name: '阴森的沼泽' }, { id: 'U', name: '被毁的村落' },
+        { id: 'X', name: '刽子手战舰' }, { id: 'W', name: '坠毁的星舰' }
+      ],
+      fights: [
+        { id: 'fight1', name: '近距离敌人' },
+        { id: 'fight2', name: '中距离敌人' },
+        { id: 'fight3', name: '远距离敌人' }
+      ]
+    },
+    setEvent(id) {
+      var self = this
+      storage.set({ key: 'darkroom_devEvent', value: id, complete: function () { self.status = '已设置「' + id + '」，返回游戏页即弹出。' } })
+    },
+    goScene(id) {
+      var self = this
+      storage.set({ key: 'darkroom_devScene', value: id, complete: function () { router.push({ uri: 'darkroom/world' }) } })
+    },
+    back() { router.back() }
+  }
+</script>
+
+<style lang="css">
+  @import '../../settings.css';
+
+  .grp {
+    color: #c8a000;
+    font-size: 22px;
+    margin-top: 16px;
+    margin-bottom: 8px;
+  }
+</style>

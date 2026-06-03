@@ -6,3 +6,4 @@
 **/private.pem
 **/certificate.pem
 gen-sign.js
+gen-icon.js

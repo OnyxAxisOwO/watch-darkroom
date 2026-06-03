@@ -3,6 +3,8 @@
    <scroll class="w-scroll" scroll-y="true">
     <!-- 状态栏 -->
     <text class="w-status" style="color: {{theme.dim}};">{{statusText}}</text>
+    <!-- 下滑提示 -->
+    <text class="w-hint" style="color: {{theme.accent}};">下滑屏幕：南 · 进食 · 返回</text>
 
     <!-- 地图视口 -->
     <div class="map">
@@ -93,8 +95,31 @@
   ]
 
   var TERRAIN = [';', ',', '.']
-  var LAND_NAMES = {
-    I: '铁矿', C: '煤矿', S: '硫磺矿', V: '潮湿的洞穴', O: '废弃的小镇', W: '坠毁的星舰', A: '小黑屋'
+
+  // 地标：name 名称, radius 生成环距, count 数量, danger 进入是否扣血
+  var LANDMARKS = {
+    I: { name: '铁矿', radius: 4, count: 1 },
+    C: { name: '煤矿', radius: 6, count: 1 },
+    S: { name: '硫磺矿', radius: 8, count: 1 },
+    V: { name: '潮湿的洞穴', radius: 5, count: 3 },
+    O: { name: '废弃的小镇', radius: 7, count: 2 },
+    H: { name: '破败的老屋', radius: 3, count: 4 },
+    Y: { name: '倾颓的废城', radius: 10, count: 1 },
+    P: { name: '补给前哨', radius: 6, count: 2 },
+    B: { name: '幽深的钻孔', radius: 9, count: 1 },
+    F: { name: '古老的战场', radius: 9, count: 1 },
+    M: { name: '阴森的沼泽', radius: 8, count: 1 },
+    U: { name: '被毁的村落', radius: 7, count: 1 },
+    X: { name: '刽子手战舰', radius: 11, count: 1 },
+    W: { name: '坠毁的星舰', radius: 11, count: 1 }
+  }
+  var LAND_CHARS = 'ICSVOHYPBFMUXW'
+
+  // 敌人池（按距离分档）
+  var ENEMIES = {
+    1: [{ name: '咆哮的野兽', hp: [4, 6], dmg: 1 }, { name: '瘦弱的野狗', hp: [3, 5], dmg: 1 }, { name: '巨大的蜥蜴', hp: [5, 7], dmg: 1 }, { name: '成群的乌鸦', hp: [3, 4], dmg: 1 }],
+    2: [{ name: '形容枯槁的人', hp: [7, 9], dmg: 2 }, { name: '生疮的乞丐', hp: [6, 9], dmg: 2 }, { name: '变异的狼', hp: [8, 11], dmg: 2 }, { name: '徘徊的拾荒者', hp: [7, 10], dmg: 2 }],
+    3: [{ name: '蒙面的劫匪', hp: [10, 14], dmg: 3 }, { name: '褴褛的掠夺者', hp: [12, 16], dmg: 3 }, { name: '残暴的巨兽', hp: [13, 18], dmg: 4 }, { name: '溃逃的士兵', hp: [11, 15], dmg: 3 }]
   }
 
   function rnd(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a }
@@ -155,6 +180,27 @@
           self.syncCaps()
           self.render()
           self.log('你站在荒原上，小黑屋的微光在身后.')
+          self.checkDevScene()
+        }
+      })
+    },
+    // 开发者「测试特殊场景」：进入即弹出指定地标/战斗，不改动真实地图
+    checkDevScene() {
+      var self = this
+      storage.get({
+        key: 'darkroom_devScene',
+        success: function (v) {
+          if (!v) return
+          storage.delete({ key: 'darkroom_devScene' })
+          if (v.indexOf('fight') === 0) {
+            var tier = parseInt(v.slice(5), 10) || 1
+            self.startFight(tier)
+          } else if (v === 'W') {
+            self.openShip()
+          } else if (LANDMARKS[v]) {
+            self._devTest = true
+            self.enterLandmark(v, self.world.x, self.world.y)
+          }
         }
       })
     },
@@ -172,12 +218,10 @@
       }
       map = this.setTile(map, RADIUS, RADIUS, 'A')
       // 地标
-      map = this.placeRing(map, 'I', 4, 1)
-      map = this.placeRing(map, 'C', 6, 1)
-      map = this.placeRing(map, 'S', 8, 1)
-      map = this.placeRing(map, 'V', 5, 3)
-      map = this.placeRing(map, 'O', 7, 2)
-      map = this.placeRing(map, 'W', RADIUS - 1, 1)
+      for (var ch in LANDMARKS) {
+        var lm = LANDMARKS[ch]
+        map = this.placeRing(map, ch, lm.radius, lm.count)
+      }
       var mask = []
       for (var i = 0; i < SIZE; i++) { var m = ''; for (var j = 0; j < SIZE; j++) m += '0'; mask.push(m) }
       var w = { map: map, mask: mask, x: RADIUS, y: RADIUS, moves: 0, sinceFight: 0 }
@@ -191,7 +235,7 @@
         var x = rnd(0, SIZE - 1), y = rnd(0, SIZE - 1)
         var dd = Math.abs(x - RADIUS) + Math.abs(y - RADIUS)
         if (dd < radius - 1 || dd > radius + 1) continue
-        if (map[y].charAt(x) === 'A' || 'ICSVOW'.indexOf(map[y].charAt(x)) >= 0) continue
+        if (map[y].charAt(x) === 'A' || LAND_CHARS.indexOf(map[y].charAt(x)) >= 0) continue
         map = this.setTile(map, x, y, ch)
         placed++
       }
@@ -290,7 +334,7 @@
       // 地标
       var t = this.getTile(nx, ny)
       if (t === 'A') { this.render(); this.log('回到了小黑屋附近.'); this.save(); }
-      else if ('ICSVOW'.indexOf(t) >= 0) { this.enterLandmark(t, nx, ny) }
+      else if (LAND_CHARS.indexOf(t) >= 0) { this.enterLandmark(t, nx, ny) }
       else {
         // 随机战斗
         w.sinceFight++
@@ -327,15 +371,16 @@
     },
 
     // ---------- 战斗 ----------
-    startFight() {
+    startFight(forceTier) {
       this.world.sinceFight = 0
       var d = dist(this.world.x, this.world.y)
-      var tier = d < 5 ? 1 : (d < 9 ? 2 : 3)
-      var names = { 1: '咆哮的野兽', 2: '形容枯槁的人', 3: '蒙面的劫匪' }
-      var hp = tier === 1 ? rnd(4, 6) : (tier === 2 ? rnd(7, 9) : rnd(10, 14))
-      this.combat = { active: true, name: names[tier], hp: hp, maxhp: hp, dmg: tier, tier: tier, stun: 0, weaponCd: {}, weapons: [] }
+      var tier = forceTier || (d < 5 ? 1 : (d < 9 ? 2 : 3))
+      var pool = ENEMIES[tier]
+      var e = pool[rnd(0, pool.length - 1)]
+      var hp = rnd(e.hp[0], e.hp[1])
+      this.combat = { active: true, name: e.name, hp: hp, maxhp: hp, dmg: e.dmg, tier: tier, stun: 0, weaponCd: {}, weapons: [] }
       this.buildWeaponButtons()
-      this.log('遭遇了' + names[tier] + '！')
+      this.log('遭遇了' + e.name + '！')
       this.render()
     },
     useWeapon(id) {
@@ -398,13 +443,23 @@
     },
 
     // ---------- 地标 ----------
+    landmarkText(t) {
+      var m = {
+        I: '矿井黑黢黢的，铁色的矿脉还能开采.', C: '焦黑的矿井里，煤层依旧厚实.', S: '刺鼻的硫磺味从矿井深处涌出.',
+        V: '洞穴深处传来滴水声，或许藏着些什么.', O: '小镇空无一人，断壁残垣间也许有遗留物资.',
+        H: '一栋破败的老屋，门虚掩着.', Y: '一座倾颓的废城，危险与机遇并存.',
+        P: '一处废弃的补给前哨，水箱里似乎还有水.', B: '一个幽深的钻孔，底部泛着奇异的光.',
+        F: '古老的战场，遍地是锈蚀的兵器残骸.', M: '阴森的沼泽，瘴气弥漫，脚下泥泞.',
+        U: '一座被毁的村落，焦土之下或有幸存的补给.'
+      }
+      return m[t] || ''
+    },
     enterLandmark(t, x, y) {
       if (t === 'W') { this.openShip(); return }
-      var e = { active: true, kind: t, title: LAND_NAMES[t], text: '', buttons: [{ id: 'enter', label: '进入探索' }, { id: 'leave', label: '离开' }] }
-      if (t === 'I' || t === 'C' || t === 'S') e.text = '矿井黑黢黢的，似乎还能开采.'
-      else if (t === 'V') e.text = '洞穴深处传来滴水声，或许藏着些什么.'
-      else if (t === 'O') e.text = '小镇空无一人，断壁残垣间也许有遗留物资.'
-      this.scene = e
+      this.scene = {
+        active: true, kind: t, title: LANDMARKS[t].name, text: this.landmarkText(t),
+        buttons: [{ id: 'enter', label: (t === 'P') ? '补充饮水' : '进入探索' }, { id: 'leave', label: '离开' }]
+      }
     },
     sceneAction(id) {
       var t = this.scene.kind
@@ -412,35 +467,69 @@
       if (id === 'leave') { this.scene = { active: false }; this.render(); return }
       if (id === 'fix' && t === 'W') {
         this.addStore('steel', -50); this.addStore('iron', -50)
-        // 标记星舰已修复，避免重复触发
         this.world.map = this.setTile(this.world.map, x, y, '#')
         this.scene = { active: false }
         this.save()
         router.push({ uri: 'darkroom/space' })
         return
       }
+      var visited = true
       if (t === 'I' || t === 'C' || t === 'S') {
         var mineBuild = { I: 'iron mine', C: 'coal mine', S: 'sulphur mine' }[t]
         var res = { I: 'iron', C: 'coal', S: 'sulphur' }[t]
         this.game.buildings[mineBuild] = 1
         this.addStore(res, rnd(20, 40))
         this.log('清理了矿井！村里可以派矿工来此开采了.')
-        this.world.map = this.setTile(this.world.map, x, y, '#')
       } else if (t === 'V') {
-        var drops = ['fur', 'teeth', 'scales', 'leather', 'medicine']
-        var k = drops[rnd(0, drops.length - 1)]
-        this.addStore(k, rnd(3, 10))
-        this.log('在洞穴里找到了一些' + this.resName(k) + '.')
-        this.world.map = this.setTile(this.world.map, x, y, '#')
+        this.loot(['fur', 'teeth', 'scales', 'leather', 'medicine'], 1, 3, 3, 10, '在洞穴里')
       } else if (t === 'O') {
-        this.addStore('cloth', rnd(2, 8)); this.addStore('leather', rnd(2, 8))
-        if (Math.random() < 0.4) this.addStore('medicine', rnd(1, 3))
-        this.log('在废墟里翻出了一些有用的东西.')
-        this.world.map = this.setTile(this.world.map, x, y, '#')
+        this.loot(['cloth', 'leather', 'medicine', 'fur'], 2, 3, 2, 8, '在废墟里')
+      } else if (t === 'H') {
+        this.loot(['wood', 'cloth', 'fur'], 1, 2, 3, 12, '在老屋里')
+      } else if (t === 'Y') {
+        this.hurt(rnd(2, 5), '城里的瓦砾割伤了你')
+        this.loot(['steel', 'leather', 'medicine', 'teeth', 'cloth'], 2, 4, 3, 12, '在废城深处')
+      } else if (t === 'P') {
+        this.water = this.maxWater
+        this.persistSurvival()
+        this.addStore('cured meat', rnd(2, 6))
+        this.log('在前哨补满了饮水，还找到一些熏肉.')
+      } else if (t === 'B') {
+        this.loot(['scales', 'teeth', 'charm', 'sulphur'], 1, 3, 4, 12, '从钻孔深处')
+      } else if (t === 'F') {
+        this.hurt(rnd(1, 4), '锈蚀的残骸划伤了你')
+        this.loot(['bullets', 'steel', 'iron', 'leather'], 2, 3, 4, 14, '在战场上')
+      } else if (t === 'M') {
+        this.hurt(rnd(3, 7), '沼泽的瘴气侵蚀着你')
+        this.loot(['medicine', 'leather', 'scales'], 1, 2, 3, 8, '在沼泽里')
+      } else if (t === 'U') {
+        this.loot(['cured meat', 'wood', 'fur', 'medicine'], 2, 4, 4, 16, '在废村里')
+      } else if (t === 'X') {
+        if (this.health <= 0) return
+        this.hurt(rnd(4, 9), '战舰守卫给你留下了伤口')
+        if (this.health <= 0) { this.scene = { active: false }; this.die(); return }
+        this.loot(['steel', 'bullets', 'sulphur', 'iron'], 3, 5, 6, 18, '从战舰残骸')
       }
+      if (visited && !this._devTest) this.world.map = this.setTile(this.world.map, x, y, '#')
+      this._devTest = false
       this.scene = { active: false }
       this.save()
       this.render()
+    },
+    // 通用掉落：从 keys 随机抓 cntMin..cntMax 种，每种 amtMin..amtMax
+    loot(keys, cntMin, cntMax, amtMin, amtMax, where) {
+      var got = {}
+      var n = rnd(cntMin, cntMax)
+      for (var i = 0; i < n; i++) { var k = keys[rnd(0, keys.length - 1)]; got[k] = (got[k] || 0) + rnd(amtMin, amtMax) }
+      var msgs = []
+      for (var key in got) { this.addStore(key, got[key]); msgs.push(this.resName(key) + '+' + got[key]) }
+      this.log((where || '') + '找到了 ' + msgs.join('，') + '.')
+    },
+    hurt(n, why) {
+      this.health -= n
+      if (this.health < 0) this.health = 0
+      this.persistSurvival()
+      this.log((why || '受了伤') + '（-' + n + ' 体力）.')
     },
 
     openShip() {
@@ -460,7 +549,11 @@
       if (this.stores[k] < 0) this.stores[k] = 0
     },
     resName(k) {
-      var m = { wood: '木头', fur: '毛皮', meat: '肉', scales: '鳞片', teeth: '牙齿', cloth: '布料', leather: '皮革', medicine: '药剂', iron: '铁', coal: '煤', sulphur: '硫磺' }
+      var m = {
+        wood: '木头', fur: '毛皮', meat: '肉', scales: '鳞片', teeth: '牙齿', cloth: '布料',
+        leather: '皮革', medicine: '药剂', iron: '铁', coal: '煤', sulphur: '硫磺',
+        charm: '符咒', bullets: '子弹', steel: '钢', 'cured meat': '熏肉'
+      }
       return m[k] || k
     },
 
@@ -478,7 +571,7 @@
           else if (x >= 0 && y >= 0 && x < SIZE && y < SIZE && w.mask[y].charAt(x) === '1') {
             ch = w.map[y].charAt(x)
             if (ch === 'A') color = this.theme.accent
-            else if ('ICSVOW'.indexOf(ch) >= 0) color = this.theme.gain
+            else if (LAND_CHARS.indexOf(ch) >= 0) color = this.theme.gain
             else color = this.theme.dim
           }
           cells.push({ ch: ch, color: color })
@@ -521,15 +614,21 @@
     flex: 1;
     flex-direction: column;
     align-items: center;
-    padding-top: 30px;
-    padding-bottom: 30px;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-top: 28px;
+    padding-bottom: 40px;
+    padding-left: 60px;
+    padding-right: 60px;
   }
 
   .w-status {
     font-size: 22px;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+
+  .w-hint {
+    font-size: 20px;
+    margin-bottom: 8px;
     text-align: center;
   }
 
@@ -614,8 +713,8 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding-left: 40px;
-    padding-right: 40px;
+    padding-left: 68px;
+    padding-right: 68px;
   }
 
   .ov-title {
@@ -625,8 +724,8 @@
   }
 
   .ov-text {
-    font-size: 24px;
-    line-height: 34px;
+    font-size: 23px;
+    line-height: 32px;
     text-align: center;
     margin-bottom: 18px;
   }

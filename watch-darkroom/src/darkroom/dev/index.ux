@@ -37,6 +37,10 @@
         <text class="s-row-label">测试小游戏（起飞）</text>
         <text class="s-row-sub">›</text>
       </div>
+      <div class="s-row" @click="testScenes">
+        <text class="s-row-label">测试特殊场景</text>
+        <text class="s-row-sub">事件/地标/战斗 ›</text>
+      </div>
       <div class="s-row" @click="triggerEvent">
         <text class="s-row-label">触发随机事件</text>
         <text class="s-row-sub">›</text>
@@ -187,6 +191,9 @@
     },
     testSpace() {
       router.push({ uri: 'darkroom/space' })
+    },
+    testScenes() {
+      router.push({ uri: 'darkroom/dev/scenes' })
     },
     triggerEvent() {
       var self = this

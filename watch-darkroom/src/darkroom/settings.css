@@ -9,10 +9,10 @@
 .s-body {
   flex: 1;
   flex-direction: column;
-  padding-left: 48px;
-  padding-right: 48px;
-  padding-top: 40px;
-  padding-bottom: 56px;
+  padding-left: 58px;
+  padding-right: 58px;
+  padding-top: 48px;
+  padding-bottom: 64px;
 }
 
 .s-title {

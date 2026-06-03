@@ -1,17 +1,19 @@
 <template>
   <div class="sp-root">
-    <text class="sp-status">{{statusText}}</text>
+    <block if="{{!over.active}}">
+      <text class="sp-status">{{statusText}}</text>
 
-    <div class="field">
-      <div class="field-row" for="{{row in grid}}">
-        <text class="sp-cell {{c.cls}}" for="{{c in row.cells}}">{{c.ch}}</text>
+      <div class="field">
+        <div class="field-row" for="{{row in grid}}">
+          <text class="sp-cell {{c.cls}}" for="{{c in row.cells}}">{{c.ch}}</text>
+        </div>
       </div>
-    </div>
 
-    <div class="sp-controls">
-      <text class="sp-key" @click="moveShip(-1)">← 左</text>
-      <text class="sp-key" @click="moveShip(1)">右 →</text>
-    </div>
+      <div class="sp-controls">
+        <text class="sp-key" @click="moveShip(-1)">← 左</text>
+        <text class="sp-key" @click="moveShip(1)">右 →</text>
+      </div>
+    </block>
 
     <!-- 结果弹窗 -->
     <div class="overlay" if="{{over.active}}">
@@ -170,8 +172,10 @@
     flex-direction: column;
     align-items: center;
     background-color: #000000;
-    padding-top: 36px;
-    padding-bottom: 20px;
+    padding-top: 46px;
+    padding-bottom: 36px;
+    padding-left: 54px;
+    padding-right: 54px;
   }
 
   .sp-status {
@@ -238,8 +242,8 @@
     justify-content: center;
     align-items: center;
     background-color: #000000;
-    padding-left: 40px;
-    padding-right: 40px;
+    padding-left: 68px;
+    padding-right: 68px;
   }
 
   .ov-title {
@@ -251,8 +255,8 @@
 
   .ov-text {
     color: #ffffff;
-    font-size: 24px;
-    line-height: 34px;
+    font-size: 23px;
+    line-height: 32px;
     text-align: center;
     margin-bottom: 18px;
   }

@@ -1,10 +1,10 @@
 {
   "package": "org.onyxaxis.adr",
-  "name": "watch-darkroom",
+  "name": "小黑屋",
   "versionName": "1.0.1",
   "versionCode": 2,
   "minPlatformVersion": 1000,
-  "icon": "/common/logo.png",
+  "icon": "/common/icon.png",
   "deviceTypeList": [
     "watch"
   ],
@@ -13,67 +13,7 @@
       "name": "system.router"
     },
     {
-      "name": "system.fetch"
-    },
-    {
-      "name": "system.audio"
-    },
-    {
-      "name": "system.request"
-    },
-    {
-      "name": "system.app"
-    },
-    {
-      "name": "system.device"
-    },
-    {
-      "name": "system.configuration"
-    },
-    {
       "name": "system.storage"
-    },
-    {
-      "name": "system.file"
-    },
-    {
-      "name": "system.interconnect"
-    },
-    {
-      "name": "system.vibrator"
-    },
-    {
-      "name": "system.brightness"
-    },
-    {
-      "name": "system.alarm"
-    },
-    {
-      "name": "system.crypto"
-    },
-    {
-      "name": "system.network"
-    },
-    {
-      "name": "system.record"
-    },
-    {
-      "name": "service.health"
-    },
-    {
-      "name": "service.sensor"
-    },
-    {
-      "name": "service.internal.alarm"
-    },
-    {
-      "name": "system.geolocation"
-    },
-    {
-      "name": "system.sensor"
-    },
-    {
-      "name": "system.volume"
     }
   ],
   "config": {
@@ -95,15 +35,6 @@
       "darkroom/speed": {
         "component": "index"
       },
-      "darkroom/about": {
-        "component": "index"
-      },
-      "darkroom/reset": {
-        "component": "index"
-      },
-      "darkroom/dev": {
-        "component": "index"
-      },
       "darkroom/commute": {
         "component": "index"
       },
@@ -119,367 +50,25 @@
       "darkroom/guide/detail": {
         "component": "index"
       },
+      "darkroom/bench": {
+        "component": "index"
+      },
+      "darkroom/about": {
+        "component": "index"
+      },
+      "darkroom/reset": {
+        "component": "index"
+      },
+      "darkroom/dev": {
+        "component": "index"
+      },
+      "darkroom/dev/scenes": {
+        "component": "index"
+      },
       "darkroom/world": {
         "component": "index"
       },
       "darkroom/space": {
-        "component": "index"
-      },
-      "darkroom/bench": {
-        "component": "index"
-      },
-      "home": {
-        "component": "index"
-      },
-      "framework/template/events": {
-        "component": "index"
-      },
-      "framework/style/file_import": {
-        "component": "index"
-      },
-      "framework/style/inline_style": {
-        "component": "index"
-      },
-      "framework/style/selector": {
-        "component": "index"
-      },
-      "framework/style/order": {
-        "component": "index"
-      },
-      "framework/style/less": {
-        "component": "index"
-      },
-      "framework/style/scss": {
-        "component": "index"
-      },
-      "framework/style/postcss": {
-        "component": "index"
-      },
-      "framework/style/media_query": {
-        "component": "index"
-      },
-      "framework/script/basic": {
-        "component": "index"
-      },
-      "framework/script/global-data-method": {
-        "component": "index"
-      },
-      "framework/script/page-data": {
-        "component": "index"
-      },
-      "framework/script/lifecycle": {
-        "component": "index"
-      },
-      "framework/script/watch": {
-        "component": "index"
-      },
-      "framework/script/launchMode/singleTask": {
-        "component": "index"
-      },
-      "framework/script/launchMode/singleTask/testPage1": {
-        "launchMode": "singleTask",
-        "component": "index"
-      },
-      "framework/script/launchMode/singleTask/testPage2": {
-        "launchMode": "singleTask",
-        "component": "index"
-      },
-      "framework/script/launchMode/singleTask/testPage3": {
-        "launchMode": "singleTask",
-        "component": "index"
-      },
-      "framework/script/launchMode/clearTask": {
-        "component": "index"
-      },
-      "framework/script/launchMode/clearTask/testPage1": {
-        "component": "index"
-      },
-      "framework/script/launchMode/clearTask/testPage2": {
-        "component": "index"
-      },
-      "framework/script/launchMode/clearTask/testPage3": {
-        "component": "index"
-      },
-      "framework/other/i18n": {
-        "component": "index"
-      },
-      "framework/other/background-running": {
-        "component": "index"
-      },
-      "component/general/style/color": {
-        "component": "index"
-      },
-      "component/general/style/color-name": {
-        "component": "index"
-      },
-      "component/general/style/width_height": {
-        "component": "index"
-      },
-      "component/general/style/border": {
-        "component": "index"
-      },
-      "component/general/style/border-radius": {
-        "component": "index"
-      },
-      "component/general/style/margin_padding": {
-        "component": "index"
-      },
-      "component/general/style/background1": {
-        "component": "index"
-      },
-      "component/general/style/background2": {
-        "component": "index"
-      },
-      "component/general/style/opacity": {
-        "component": "index"
-      },
-      "component/general/style/display_visibility": {
-        "component": "index"
-      },
-      "component/general/style/flex": {
-        "component": "index"
-      },
-      "component/general/style/flex1": {
-        "component": "index"
-      },
-      "component/general/style/position": {
-        "component": "index"
-      },
-      "component/general/properties/for": {
-        "component": "index"
-      },
-      "component/general/properties/if": {
-        "component": "index"
-      },
-      "component/general/properties/id_style_class": {
-        "component": "index"
-      },
-      "component/general/properties/show": {
-        "component": "index"
-      },
-      "component/general/properties/data": {
-        "component": "index"
-      },
-      "component/general/events/touch": {
-        "component": "index"
-      },
-      "component/general/events/click_longpress": {
-        "component": "index"
-      },
-      "component/general/events/swipe": {
-        "component": "index"
-      },
-      "component/general/methods/element": {
-        "component": "index"
-      },
-      "component/general/methods/getBoundingClientRect": {
-        "component": "index"
-      },
-      "component/general/methods/focus": {
-        "component": "index"
-      },
-      "component/general/animation-style/transform": {
-        "component": "index"
-      },
-      "component/general/animation-style/animation": {
-        "component": "index"
-      },
-      "component/general/animation-style/transition": {
-        "component": "index"
-      },
-      "component/general/animation-style/transition1": {
-        "component": "index"
-      },
-      "component/container/div": {
-        "component": "index"
-      },
-      "component/container/list": {
-        "component": "index"
-      },
-      "component/container/scroll": {
-        "component": "index"
-      },
-      "component/container/stack": {
-        "component": "index"
-      },
-      "component/container/swiper": {
-        "component": "index"
-      },
-      "component/container/swiper1": {
-        "component": "index"
-      },
-      "component/container/block": {
-        "component": "index"
-      },
-      "component/basic/text": {
-        "component": "index"
-      },
-      "component/basic/span": {
-        "component": "index"
-      },
-      "component/basic/image1": {
-        "component": "index"
-      },
-      "component/basic/image2": {
-        "component": "index"
-      },
-      "component/basic/image3": {
-        "component": "index"
-      },
-      "component/basic/progress": {
-        "component": "index"
-      },
-      "component/basic/marquee": {
-        "component": "index"
-      },
-      "component/basic/chart": {
-        "component": "index"
-      },
-      "component/basic/qrcode": {
-        "component": "index"
-      },
-      "component/basic/a": {
-        "component": "index"
-      },
-      "component/basic/barcode": {
-        "component": "index"
-      },
-      "interface/basic/app": {
-        "component": "index"
-      },
-      "interface/basic/device": {
-        "component": "index"
-      },
-      "interface/basic/configuration": {
-        "component": "index"
-      },
-      "interface/basic/router": {
-        "component": "index"
-      },
-      "component/form/input": {
-        "component": "index"
-      },
-      "component/form/picker": {
-        "component": "index"
-      },
-      "component/form/switch": {
-        "component": "index"
-      },
-      "component/form/slider": {
-        "component": "index"
-      },
-      "interface/basic/router/detail": {
-        "component": "index"
-      },
-      "interface/network/interconnect": {
-        "component": "index"
-      },
-      "interface/network/fetch": {
-        "component": "index"
-      },
-      "interface/network/request": {
-        "component": "index"
-      },
-      "interface/data/storage": {
-        "component": "index"
-      },
-      "interface/data/file": {
-        "component": "index"
-      },
-      "interface/system/network": {
-        "component": "index"
-      },
-      "interface/system/vibrator": {
-        "component": "index"
-      },
-      "interface/system/brightness": {
-        "component": "index"
-      },
-      "interface/system/alarm": {
-        "component": "index"
-      },
-      "interface/system/health": {
-        "component": "index"
-      },
-      "interface/system/geolocation": {
-        "component": "index"
-      },
-      "interface/system/sensor": {
-        "component": "index"
-      },
-      "interface/system/volume": {
-        "component": "index"
-      },
-      "interface/other/audio": {
-        "component": "index"
-      },
-      "interface/other/record": {
-        "component": "index"
-      },
-      "other/performance/image": {
-        "component": "index"
-      },
-      "other/other/text-height": {
-        "component": "index"
-      },
-      "other/other/change-image": {
-        "component": "index"
-      },
-      "other/other/dynamic-image": {
-        "component": "index"
-      },
-      "other/other/change-list": {
-        "component": "index"
-      },
-      "other/other/dynamic-value": {
-        "component": "index"
-      },
-      "other/component-perf": {
-        "component": "index"
-      },
-      "other/component-perf/div": {
-        "component": "index"
-      },
-      "other/component-perf/list": {
-        "component": "index"
-      },
-      "other/component-perf/stack": {
-        "component": "index"
-      },
-      "other/component-perf/swiper": {
-        "component": "index"
-      },
-      "other/component-perf/text": {
-        "component": "index"
-      },
-      "other/component-perf/span": {
-        "component": "index"
-      },
-      "other/component-perf/image": {
-        "component": "index"
-      },
-      "other/component-perf/progress": {
-        "component": "index"
-      },
-      "other/component-perf/marquee": {
-        "component": "index"
-      },
-      "other/component-perf/chart": {
-        "component": "index"
-      },
-      "other/component-perf/qrcode": {
-        "component": "index"
-      },
-      "other/component-perf/input": {
-        "component": "index"
-      },
-      "other/component-perf/picker": {
-        "component": "index"
-      },
-      "other/component-perf/switch": {
-        "component": "index"
-      },
-      "other/component-perf/slider": {
         "component": "index"
       }
     }
@@ -487,10 +76,5 @@
   "display": {
     "backgroundColor": "#000000",
     "textColor": "#ffffff"
-  },
-  "background": {
-    "features": [
-      "system.audio"
-    ]
   }
 }
