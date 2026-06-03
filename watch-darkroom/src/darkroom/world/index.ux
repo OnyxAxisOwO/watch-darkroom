@@ -40,10 +40,11 @@
 
     <!-- 战斗弹窗 -->
     <div class="overlay" if="{{combat.active}}" style="background-color: {{theme.bg}};">
-      <text class="ov-title" style="color: {{theme.accent}};">{{combat.name}}</text>
-      <text class="ov-text" style="color: {{theme.text}};">敌人 HP {{combat.hp}} / {{combat.maxhp}}</text>
-      <text class="ov-text" style="color: {{theme.text}};">你的 HP {{health}} / {{maxHealth}}</text>
-      <text class="ov-btn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="attack">{{attackLabel}}</text>
+      <text class="ov-title" style="color: {{theme.accent}};">{{combat.name}}{{combat.stun > 0 ? '（眩晕）' : ''}}</text>
+      <text class="ov-text" style="color: {{theme.text}};">敌人 HP {{combat.hp}}/{{combat.maxhp}}　你 HP {{health}}/{{maxHealth}}</text>
+      <text class="ov-btn" for="{{w in combat.weapons}}"
+        style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}}; opacity: {{w.disabled ? 0.4 : 1}};"
+        @click="useWeapon(w.id)">{{w.label}}</text>
       <text class="ov-btn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="flee">逃跑</text>
     </div>
 
@@ -80,6 +81,17 @@
   var FIGHT_CHANCE = 0.2
   var MEAT_HEAL = 8
 
+  // 武器：dmg 伤害, cd 冷却回合, ranged 远程(消耗弹药), stun 眩晕(跳过敌人一次攻击)
+  var WEAPONS = [
+    { id: 'fists', name: '拳头', verb: '挥拳', dmg: 1, cd: 1, ranged: false, always: true },
+    { id: 'bone spear', name: '骨枪', verb: '刺击', dmg: 2, cd: 2, ranged: false },
+    { id: 'iron sword', name: '铁剑', verb: '挥砍', dmg: 4, cd: 2, ranged: false },
+    { id: 'steel sword', name: '钢剑', verb: '劈斩', dmg: 6, cd: 2, ranged: false },
+    { id: 'rifle', name: '步枪', verb: '射击', dmg: 5, cd: 1, ranged: true, ammo: 'bullets' },
+    { id: 'bolas', name: '流星索', verb: '缠住', dmg: 0, cd: 3, ranged: true, ammo: 'bolas', stun: true },
+    { id: 'grenade', name: '手雷', verb: '投掷', dmg: 15, cd: 4, ranged: true, ammo: 'grenade' }
+  ]
+
   var TERRAIN = [';', ',', '.']
   var LAND_NAMES = {
     I: '铁矿', C: '煤矿', S: '硫磺矿', V: '潮湿的洞穴', O: '废弃的小镇', W: '坠毁的星舰', A: '小黑屋'
@@ -111,6 +123,17 @@
       var self = this
       storage.get({ key: 'darkroom_theme', success: function (v) { var i = parseInt(v, 10); if (!isNaN(i) && THEMES[i]) self.theme = THEMES[i] } })
       this.loadAll()
+    },
+    onShow() {
+      // 从太空小游戏返回时，把通关标记同步回内存，避免离开时被覆盖
+      var self = this
+      storage.get({
+        key: SAVE_KEY,
+        success: function (val) {
+          if (!val) return
+          try { var d = JSON.parse(val); if (d.game && d.game.won) { self.game.won = true; self.log('你已飞向群星，传奇就此封存.') } } catch (e) { }
+        }
+      })
     },
 
     loadAll() {
@@ -214,14 +237,34 @@
       this.food = this.world.food
     },
 
-    bestWeapon() {
+    // 玩家持有的武器（拳头恒有；枪剑看是否造过；流星索/手雷看库存）
+    ownedWeapons() {
       var b = this.game.buildings || {}
-      var best = { name: '拳头', verb: '挥拳', dmg: 1, ranged: false }
-      if (b['bone spear']) best = { name: '骨枪', verb: '刺', dmg: 2, ranged: false }
-      if (b['iron sword']) best = { name: '铁剑', verb: '挥砍', dmg: 4, ranged: false }
-      if (b['steel sword']) best = { name: '钢剑', verb: '斩', dmg: 6, ranged: false }
-      if (b.rifle && (this.stores.bullets || 0) > 0 && 5 > best.dmg) best = { name: '步枪', verb: '射击', dmg: 5, ranged: true }
-      return best
+      var list = []
+      for (var j = 0; j < WEAPONS.length; j++) {
+        var wp = WEAPONS[j]
+        if (wp.always) { list.push(wp); continue }
+        var owned = (wp.id === 'bolas' || wp.id === 'grenade') ? ((this.stores[wp.id] || 0) > 0) : (b[wp.id] > 0)
+        if (owned) list.push(wp)
+      }
+      return list
+    },
+    buildWeaponButtons() {
+      var c = this.combat
+      var owned = this.ownedWeapons()
+      var btns = []
+      for (var i = 0; i < owned.length; i++) {
+        var w = owned[i]
+        var cd = (c.weaponCd && c.weaponCd[w.id]) || 0
+        var noAmmo = w.ammo && (this.stores[w.ammo] || 0) <= 0
+        var label = w.verb + '(' + w.name + ')'
+        if (w.stun) label += ' 眩晕'
+        else label += ' ' + w.dmg
+        if (cd > 0) label += ' 冷却' + cd
+        else if (noAmmo) label += ' 无弹药'
+        btns.push({ id: w.id, label: label, disabled: cd > 0 || noAmmo })
+      }
+      c.weapons = btns
     },
 
     // ---------- 移动 ----------
@@ -290,27 +333,41 @@
       var tier = d < 5 ? 1 : (d < 9 ? 2 : 3)
       var names = { 1: '咆哮的野兽', 2: '形容枯槁的人', 3: '蒙面的劫匪' }
       var hp = tier === 1 ? rnd(4, 6) : (tier === 2 ? rnd(7, 9) : rnd(10, 14))
-      var dmg = tier
-      this.combat = { active: true, name: names[tier], hp: hp, maxhp: hp, dmg: dmg, tier: tier }
-      this.attackLabel = '攻击（' + this.bestWeapon().name + '）'
+      this.combat = { active: true, name: names[tier], hp: hp, maxhp: hp, dmg: tier, tier: tier, stun: 0, weaponCd: {}, weapons: [] }
+      this.buildWeaponButtons()
       this.log('遭遇了' + names[tier] + '！')
+      this.render()
     },
-    attack() {
+    useWeapon(id) {
       var c = this.combat
       if (!c.active) return
-      var w = this.bestWeapon()
-      if (w.ranged) this.addStore('bullets', -1)
-      c.hp -= w.dmg
-      this.log('你' + w.verb + '，造成 ' + w.dmg + ' 点伤害.')
+      var w = null
+      for (var i = 0; i < WEAPONS.length; i++) if (WEAPONS[i].id === id) w = WEAPONS[i]
+      if (!w) return
+      var cd = (c.weaponCd && c.weaponCd[id]) || 0
+      if (cd > 0) return
+      if (w.ammo) {
+        if ((this.stores[w.ammo] || 0) <= 0) return
+        this.addStore(w.ammo, -1)
+      }
+      if (w.stun) { c.stun = 2; this.log('你' + w.verb + '住了敌人，它一时无法动弹.') }
+      else { c.hp -= w.dmg; this.log('你' + w.verb + '，造成 ' + w.dmg + ' 点伤害.') }
+      c.weaponCd[id] = w.cd
       if (c.hp <= 0) { this.winFight(); return }
-      // 敌人反击
-      if (Math.random() < 0.8) {
+      this.enemyTurn(c)
+    },
+    enemyTurn(c) {
+      // 冷却递减
+      for (var k in c.weaponCd) if (c.weaponCd[k] > 0) c.weaponCd[k]--
+      if (c.stun > 0) { c.stun--; this.log('敌人还在眩晕中.') }
+      else if (Math.random() < 0.8) {
         this.health -= c.dmg
         this.persistSurvival()
         this.log('它反击，你受了 ' + c.dmg + ' 点伤.')
         if (this.health <= 0) { this.combat = { active: false }; this.die(); return }
       } else this.log('它扑空了.')
-      this.combat = { active: true, name: c.name, hp: c.hp, maxhp: c.maxhp, dmg: c.dmg, tier: c.tier }
+      this.buildWeaponButtons()
+      this.combat = c
       this.render()
     },
     flee() {
@@ -321,7 +378,9 @@
         this.persistSurvival()
         this.log('逃跑失败，挨了一下.')
         if (this.health <= 0) { this.combat = { active: false }; this.die(); return }
-        this.combat = { active: true, name: c.name, hp: c.hp, maxhp: c.maxhp, dmg: c.dmg, tier: c.tier }
+        for (var k in c.weaponCd) if (c.weaponCd[k] > 0) c.weaponCd[k]--
+        this.buildWeaponButtons()
+        this.combat = c
       }
       this.render()
     },
@@ -353,11 +412,11 @@
       if (id === 'leave') { this.scene = { active: false }; this.render(); return }
       if (id === 'fix' && t === 'W') {
         this.addStore('steel', -50); this.addStore('iron', -50)
+        // 标记星舰已修复，避免重复触发
+        this.world.map = this.setTile(this.world.map, x, y, '#')
         this.scene = { active: false }
-        this.game.won = true
-        this.ending = true
         this.save()
-        this.render()
+        router.push({ uri: 'darkroom/space' })
         return
       }
       if (t === 'I' || t === 'C' || t === 'S') {

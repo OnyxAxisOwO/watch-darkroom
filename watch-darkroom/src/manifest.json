@@ -122,6 +122,9 @@
       "darkroom/world": {
         "component": "index"
       },
+      "darkroom/space": {
+        "component": "index"
+      },
       "home": {
         "component": "index"
       },

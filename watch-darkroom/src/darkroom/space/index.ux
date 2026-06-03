@@ -1,0 +1,255 @@
+<template>
+  <div class="sp-root" style="background-color: {{theme.bg}};">
+    <text class="sp-status" style="color: {{theme.dim}};">{{statusText}}</text>
+
+    <div class="field">
+      <div class="field-row" for="{{row in grid}}">
+        <text class="sp-cell" for="{{c in row.cells}}" style="color: {{c.color}};">{{c.ch}}</text>
+      </div>
+    </div>
+
+    <div class="sp-controls">
+      <text class="sp-key" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="moveShip(-1)">← 左</text>
+      <text class="sp-key" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="moveShip(1)">右 →</text>
+    </div>
+
+    <!-- 结果弹窗 -->
+    <div class="overlay" if="{{over.active}}" style="background-color: {{theme.bg}};">
+      <text class="ov-title" style="color: {{theme.accent}};">{{over.title}}</text>
+      <text class="ov-text" style="color: {{theme.text}};">{{over.text}}</text>
+      <text if="{{over.kind === 'crash'}}" class="ov-btn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="retry">再试一次</text>
+      <text class="ov-btn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};" @click="leave">返回</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import storage from '@system.storage'
+  import router from '@system.router'
+  import { THEMES } from '../themes.js'
+
+  var SAVE_KEY = 'darkroom_save_v1'
+  var W = 7
+  var H = 10
+  var SHIP_ROW = H - 1
+  var TARGET = 60
+  var MAX_HULL = 15
+  var TICK = 360
+
+  function rnd(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a }
+
+  export default {
+    private: {
+      theme: THEMES[0],
+      grid: [],
+      statusText: '',
+      shipX: 3,
+      hull: 15,
+      maxHull: 15,
+      altitude: 0,
+      asteroids: [],
+      over: { active: false, kind: '', title: '', text: '' }
+    },
+
+    onInit() {
+      var self = this
+      storage.get({ key: 'darkroom_theme', success: function (v) { var i = parseInt(v, 10); if (!isNaN(i) && THEMES[i]) self.theme = THEMES[i] } })
+    },
+    onReady() {
+      this.reset()
+      this._alive = true
+      this.loop()
+    },
+    onHide() { this._alive = false; if (this._t) { clearTimeout(this._t); this._t = null } },
+    onDestroy() { this._alive = false; if (this._t) clearTimeout(this._t) },
+
+    reset() {
+      this.shipX = 3
+      this.hull = MAX_HULL
+      this.maxHull = MAX_HULL
+      this.altitude = 0
+      this.asteroids = []
+      this.over = { active: false, kind: '', title: '', text: '' }
+      this.render()
+    },
+
+    loop() {
+      var self = this
+      this._t = setTimeout(function () {
+        if (!self._alive) return
+        if (!self.over.active) self.step()
+        self.loop()
+      }, TICK)
+    },
+
+    step() {
+      // 下落
+      var next = []
+      for (var i = 0; i < this.asteroids.length; i++) {
+        var a = this.asteroids[i]
+        a.y++
+        if (a.y > SHIP_ROW) continue       // 越过底部，消失
+        if (a.y === SHIP_ROW && a.x === this.shipX) { this.hit(); continue }
+        next.push(a)
+      }
+      // 生成新陨石
+      var prob = 0.35 + this.altitude / 240
+      if (Math.random() < prob) next.push({ x: rnd(0, W - 1), y: 0 })
+      this.asteroids = next
+      // 爬升
+      this.altitude++
+      if (this.altitude >= TARGET) { this.win(); return }
+      this.render()
+    },
+
+    hit() {
+      this.hull--
+      if (this.hull <= 0) { this.hull = 0; this.crash(); }
+    },
+
+    moveShip(dir) {
+      if (this.over.active) return
+      var nx = this.shipX + dir
+      if (nx < 0 || nx >= W) return
+      this.shipX = nx
+      // 即时碰撞检测（移动到陨石上）
+      for (var i = 0; i < this.asteroids.length; i++) {
+        if (this.asteroids[i].y === SHIP_ROW && this.asteroids[i].x === this.shipX) {
+          this.asteroids.splice(i, 1); this.hit(); break
+        }
+      }
+      this.render()
+    },
+
+    win() {
+      var self = this
+      storage.get({
+        key: SAVE_KEY,
+        success: function (val) {
+          var d = { game: {}, stores: {} }
+          if (val) { try { d = JSON.parse(val) } catch (e) { } }
+          if (!d.game) d.game = {}
+          d.game.won = true
+          storage.set({ key: SAVE_KEY, value: JSON.stringify(d) })
+          storage.set({ key: 'darkroom_dirty', value: '1' })
+        }
+      })
+      this.over = {
+        active: true, kind: 'win', title: '飞向群星',
+        text: '星舰冲破了最后一层云霭，荒原在脚下化作一片寂静的灰。前方，是无垠的星海。\n\n——通关——\n\n感谢游玩《手表版小黑屋》.'
+      }
+    },
+    crash() {
+      this.over = {
+        active: true, kind: 'crash', title: '坠毁',
+        text: '船体被陨石撕裂，星舰拖着浓烟坠回大地……\n\n爬升高度：' + this.altitude + ' / ' + TARGET
+      }
+    },
+    retry() { this.reset() },
+    leave() { router.back() },
+
+    render() {
+      var occ = {}
+      for (var i = 0; i < this.asteroids.length; i++) occ[this.asteroids[i].x + ',' + this.asteroids[i].y] = true
+      var rows = []
+      for (var r = 0; r < H; r++) {
+        var cells = []
+        for (var c = 0; c < W; c++) {
+          var ch = ' ', color = this.theme.bg
+          if (r === SHIP_ROW && c === this.shipX) { ch = '^'; color = this.theme.accent }
+          else if (occ[c + ',' + r]) { ch = '*'; color = this.theme.lose }
+          cells.push({ ch: ch, color: color })
+        }
+        rows.push({ cells: cells })
+      }
+      this.grid = rows
+      this.statusText = '高度 ' + this.altitude + '/' + TARGET + '　船体 ' + this.hull + '/' + this.maxHull
+    }
+  }
+</script>
+
+<style lang="css">
+  .sp-root {
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 36px;
+    padding-bottom: 20px;
+  }
+
+  .sp-status {
+    font-size: 22px;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .field {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .field-row {
+    flex-direction: row;
+  }
+
+  .sp-cell {
+    width: 40px;
+    height: 32px;
+    font-size: 28px;
+    text-align: center;
+  }
+
+  .sp-controls {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .sp-key {
+    width: 120px;
+    height: 60px;
+    text-align: center;
+    border-width: 1px;
+    border-radius: 8px;
+    font-size: 28px;
+    margin: 8px;
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .ov-title {
+    font-size: 30px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+
+  .ov-text {
+    font-size: 24px;
+    line-height: 34px;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .ov-btn {
+    align-self: stretch;
+    text-align: center;
+    border-width: 1px;
+    border-radius: 8px;
+    font-size: 26px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 10px;
+  }
+</style>

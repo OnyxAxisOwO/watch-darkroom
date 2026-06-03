@@ -29,6 +29,14 @@
         <text class="s-row-label">解锁探索 + 装备</text>
         <text class="s-row-sub">›</text>
       </div>
+      <div class="s-row" @click="giveWeapons">
+        <text class="s-row-label">全部武器 + 弹药</text>
+        <text class="s-row-sub">›</text>
+      </div>
+      <div class="s-row" @click="testSpace">
+        <text class="s-row-label">测试小游戏（起飞）</text>
+        <text class="s-row-sub">›</text>
+      </div>
       <div class="s-row" @click="triggerEvent">
         <text class="s-row-label">触发随机事件</text>
         <text class="s-row-sub">›</text>
@@ -163,6 +171,22 @@
         var add = { compass: 1, 'cured meat': 50, bullets: 50, steel: 60, iron: 60, wood: 500, leather: 200 }
         for (var k in add) d.stores[k] = (d.stores[k] || 0) + add[k]
       }, '已解锁指南针、武器护甲与补给，可在森林页出发探索。')
+    },
+    giveWeapons() {
+      this.patch(function (d) {
+        d.game.builder = 4
+        var b = d.game.buildings
+        b.workshop = 1
+        b['bone spear'] = Math.max(b['bone spear'] || 0, 1)
+        b['iron sword'] = 1
+        b['steel sword'] = 1
+        b.rifle = 1
+        var add = { bullets: 200, bolas: 20, grenade: 20 }
+        for (var k in add) d.stores[k] = (d.stores[k] || 0) + add[k]
+      }, '已发放全部武器与弹药（含流星索/手雷），进荒野战斗即可测试。')
+    },
+    testSpace() {
+      router.push({ uri: 'darkroom/space' })
     },
     triggerEvent() {
       var self = this
