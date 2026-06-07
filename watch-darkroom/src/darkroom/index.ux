@@ -40,10 +40,10 @@
           <text class="worker-name" style="color: {{theme.text}};">{{w.name}}</text>
           <div class="worker-ctrl">
             <text class="wbtn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};"
-              @click="decWorker(w.key)">-</text>
+               @click="decWorker(w.key)">-</text>
             <text class="wcount" style="color: {{theme.text}};">{{w.count}}</text>
             <text class="wbtn" style="background-color: {{theme.btnBg}}; border-color: {{theme.btnBorder}}; color: {{theme.text}};"
-              @click="incWorker(w.key)">+</text>
+               @click="incWorker(w.key)">+</text>
           </div>
         </div>
       </block>
@@ -254,12 +254,15 @@
         buildings: {},
         population: 0,
         workers: {},
-        perks: {}
+        perks: {},
+        unlockedCrafts: {}
       },
       stores: {},
       cd: { stoke: 0, gather: 0, traps: 0 },
       t: { fireCool: FIRE_COOL, roomWarm: ROOM_WARM, builder: BUILDER_DELAY, income: INCOME_DELAY, pop: 60, event: 240 },
-      _flash: {}
+      _flash: {},
+      _flashTimeout: null,
+      _loaded: false
     },
 
     onInit() {
@@ -277,7 +280,10 @@
       var d = new Date()
       var h = d.getHours()
       var m = d.getMinutes()
-      this.clock = (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
+      var str = (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
+      if (this.clock !== str) {
+        this.clock = str
+      }
     },
     scheduleTick() {
       var self = this
@@ -318,19 +324,22 @@
 
     reloadSave() {
       var self = this
+      self._loaded = false
       storage.get({
         key: SAVE_KEY,
         success: function (val) {
-          if (!val) return
+          if (!val) { self._loaded = true; return }
           try {
             var d = JSON.parse(val)
             if (d.game) self.game = d.game
             if (d.stores) self.stores = d.stores
             self.seenForest = !!d.seenForest
             self.normalizeGame()
+            self._loaded = true
             self.render()
-          } catch (e) { }
-        }
+          } catch (e) { self._loaded = true }
+        },
+        fail: function () { self._loaded = true }
       })
     },
 
@@ -342,12 +351,13 @@
       if (typeof g.perks === 'undefined') g.perks = {}
       if (typeof g.ship === 'undefined') g.ship = { hull: 0, engine: 0 }
       if (typeof g.prestige === 'undefined') g.prestige = 0
+      if (typeof g.unlockedCrafts === 'undefined') g.unlockedCrafts = {}
     },
 
     resetState() {
       this.game = {
         fire: 0, temperature: 0, builder: -1, fireLit: false, builderTimer: 0,
-        buildings: {}, population: 0, workers: {}, perks: {}
+        buildings: {}, population: 0, workers: {}, perks: {}, unlockedCrafts: {}
       }
       this.stores = {}
       this.seenForest = false
@@ -397,13 +407,18 @@
       if (typeof this._acc !== 'number') this._acc = 0
       this._acc += sp
       var guard = 0
+      var stateChanged = false
       while (this._acc >= 1 && guard < 20) {
         this._acc -= 1
         guard++
-        this.stepSecond()
+        if (this.stepSecond()) {
+          stateChanged = true
+        }
       }
       this.updateClock()
-      this.render()
+      if (stateChanged) {
+        this.render()
+      }
       this._saveCounter = (this._saveCounter || 0) + 1
       if (this._saveCounter >= 10) { this._saveCounter = 0; this.save() }
     },
@@ -411,14 +426,20 @@
     stepSecond() {
       var g = this.game
       var cd = this.cd
-      if (cd.stoke > 0) cd.stoke--
-      if (cd.gather > 0) cd.gather--
-      if (cd.traps > 0) cd.traps--
+      var changed = false
+      if (cd.stoke > 0) { cd.stoke--; changed = true }
+      if (cd.gather > 0) { cd.gather--; changed = true }
+      if (cd.traps > 0) { cd.traps--; changed = true }
 
       // 火焰衰减
       if (g.fire > 0) {
         this.t.fireCool--
-        if (this.t.fireCool <= 0) { g.fire--; this.t.fireCool = FIRE_COOL; this.log(FIRE_TXT[g.fire]) }
+        if (this.t.fireCool <= 0) {
+          g.fire--
+          this.t.fireCool = FIRE_COOL
+          this.log(FIRE_TXT[g.fire])
+          changed = true
+        }
       }
       // 房间温度趋近火焰
       this.t.roomWarm--
@@ -427,12 +448,17 @@
         if (g.temperature !== g.fire) {
           g.temperature += (g.temperature < g.fire) ? 1 : -1
           this.log(TEMP_TXT[g.temperature])
+          changed = true
         }
       }
       // 建造者出现
       if (g.fireLit && g.builder === -1) {
         g.builderTimer--
-        if (g.builderTimer <= 0) { g.builder = 0; this.log('一个衣衫褴褛的陌生人步履蹒跚地走进了门，倒在了角落里.') }
+        if (g.builderTimer <= 0) {
+          g.builder = 0
+          this.log('一个衣衫褴褛的陌生人步履蹒跚地走进了门，倒在了角落里.')
+          changed = true
+        }
       }
       // 建造者状态推进
       if (g.builder >= 0 && g.builder < 4) {
@@ -442,23 +468,36 @@
           if (g.temperature >= 2) {
             g.builder++
             this.log(BUILDER_TXT[g.builder - 1] || '')
+            changed = true
           }
         }
       }
       // 工人收入
       this.t.income--
-      if (this.t.income <= 0) { this.t.income = INCOME_DELAY; this.applyIncome() }
+      if (this.t.income <= 0) {
+        this.t.income = INCOME_DELAY
+        this.applyIncome()
+        changed = true
+      }
       // 人口增长
       if ((g.buildings.hut || 0) > 0) {
         this.t.pop--
-        if (this.t.pop <= 0) { this.t.pop = rand(30, 180); this.growPopulation() }
+        if (this.t.pop <= 0) {
+          this.t.pop = rand(30, 180)
+          this.growPopulation()
+          changed = true
+        }
       }
       // 随机事件
       this.t.event--
       if (this.t.event <= 0) {
         this.t.event = rand(180, 360)
-        if (!this.event.active) this.triggerEvent()
+        if (!this.event.active) {
+          this.triggerEvent()
+          changed = true
+        }
       }
+      return changed
     },
 
     applyIncome() {
@@ -920,6 +959,7 @@
     craftUnlocked(id) {
       var g = this.game
       if (g.builder < 4) return false
+      if (g.unlockedCrafts && g.unlockedCrafts[id]) return true
       var c = CRAFTABLES[id]
       if (c.type === 'found') return false            // 外星制造机：荒野获得，不可建造
       if (c.type === 'fab' || c.type === 'ammo') {     // 制造机配方需有外星制造机
@@ -934,6 +974,8 @@
         if (!this.has(res)) return false
       }
       if (cost.wood && (this.stores.wood || 0) < cost.wood * 0.5) return false
+      if (!g.unlockedCrafts) g.unlockedCrafts = {}
+      g.unlockedCrafts[id] = true
       return true
     },
 
@@ -978,16 +1020,25 @@
 
     buildStores() {
       var list = []
+      var hasFlash = false
       for (var i = 0; i < STORE_ORDER.length; i++) {
         var k = STORE_ORDER[i]
         if (typeof this.stores[k] === 'undefined') continue
         var v = Math.floor(this.stores[k])
         if (v <= 0 && k !== 'wood') continue
-        list.push({ name: RES_NAME[k], value: v, flash: this._flash[k] || '' })
+        var flashVal = this._flash[k] || ''
+        if (flashVal) hasFlash = true
+        list.push({ name: RES_NAME[k], value: v, flash: flashVal })
       }
       this.storeList = list
-      var self = this
-      setTimeout(function () { self._flash = {} }, 600)
+      if (hasFlash) {
+        var self = this
+        if (this._flashTimeout) clearTimeout(this._flashTimeout)
+        this._flashTimeout = setTimeout(function () {
+          self._flash = {}
+          self.render()
+        }, 600)
+      }
     },
 
     buildBuildingList() {
@@ -1025,12 +1076,14 @@
     // ---------- 日志 ----------
     log(text) {
       if (!text) return
-      this.logs.unshift({ text: text })
+      this._logId = (this._logId || 0) + 1
+      this.logs.unshift({ id: String(this._logId), text: text })
       if (this.logs.length > 30) this.logs.pop()
     },
 
     // ---------- 存档 ----------
     save() {
+      if (!this._loaded) return
       storage.set({
         key: SAVE_KEY,
         value: JSON.stringify({ game: this.game, stores: this.stores, seenForest: this.seenForest, tab: this.tab })
@@ -1054,9 +1107,14 @@
           } else {
             self.log('黑暗中，火堆早已熄灭，房间冰冷.')
           }
+          self._loaded = true
           self.render()
         },
-        fail: function () { self.log('黑暗中，火堆早已熄灭，房间冰冷.'); self.render() }
+        fail: function () {
+          self.log('黑暗中，火堆早已熄灭，房间冰冷.')
+          self._loaded = true
+          self.render()
+        }
       })
     }
   }

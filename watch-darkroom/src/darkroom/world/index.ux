@@ -147,7 +147,8 @@
       scene: { active: false, kind: '', title: '', text: '', buttons: [] },
       ending: false,
       game: {}, stores: {},
-      world: null
+      world: null,
+      _loaded: false
     },
 
     onInit() {
@@ -184,9 +185,13 @@
             self.game.world = self.world
           }
           self.syncCaps()
+          self._loaded = true
           self.render()
           self.log('你站在荒原上，小黑屋的微光在身后.')
           self.checkDevScene()
+        },
+        fail: function () {
+          self._loaded = true
         }
       })
     },
@@ -616,9 +621,9 @@
             else if (LAND_CHARS.indexOf(ch) >= 0) color = this.theme.gain
             else color = this.theme.dim
           }
-          cells.push({ ch: ch, color: color })
+          cells.push({ id: dx + ',' + dy, ch: ch, color: color })
         }
-        rows.push({ cells: cells })
+        rows.push({ id: String(dy), cells: cells })
       }
       this.grid = rows
       this.canEat = this.food > 0
@@ -627,12 +632,14 @@
 
     log(text) {
       if (!text) return
-      this.logs.unshift({ text: text })
+      this._logId = (this._logId || 0) + 1
+      this.logs.unshift({ id: String(this._logId), text: text })
       if (this.logs.length > 20) this.logs.pop()
     },
 
     // ---------- 存档 / 退出 ----------
     save() {
+      if (!this._loaded) return
       if (this.world) this.game.world = this.world
       this.persistSurvival()
       storage.set({ key: SAVE_KEY, value: JSON.stringify({ game: this.game, stores: this.stores, seenForest: true, tab: 'outside' }) })

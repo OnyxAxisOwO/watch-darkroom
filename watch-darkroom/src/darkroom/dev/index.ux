@@ -83,7 +83,7 @@
     return {
       game: {
         fire: 0, temperature: 0, builder: -1, fireLit: false, builderTimer: 0,
-        buildings: {}, population: 0, workers: {}, perks: {}
+        buildings: {}, population: 0, workers: {}, perks: {}, unlockedCrafts: {}
       },
       stores: {}, seenForest: false, tab: 'room'
     }
@@ -244,7 +244,7 @@
         d.game = {
           fire: 0, temperature: 0, builder: -1, fireLit: false, builderTimer: 0,
           buildings: {}, population: 0, workers: {}, perks: {}, ship: { hull: 0, engine: 0 },
-          prestige: p, world: null
+          prestige: p, world: null, unlockedCrafts: {}
         }
         d.stores = { wood: 100 * p, fur: 20 * p }
         d.seenForest = false
